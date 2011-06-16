@@ -79,13 +79,11 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
 #ifdef YENC_CHECK_SIZE
     ptmp = pslice(&phead, "size=", " ");
     if(ptmp != NULL) {
-        printf("ptmp=%s\n", ptmp);
         valid_size = atoi(ptmp);
     }
     ptmp = pslice(&ptail, "size=", " ");
     if(ptmp != NULL && atoi(ptmp) != valid_size) {
-        fprintf(stderr, "[err] yenc size check failed (%d/%d)\n",
-                atoi(ptmp), valid_size);
+        ERROR("yenc size check failed (%d/%d)\n", atoi(ptmp), valid_size);
         return -1;
     }
 #endif
@@ -99,37 +97,36 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
     /* we shrink the buffer later to the actual size */ 
     decoded = malloc(encoded_size);
     if(decoded == NULL) {
-        fprintf(stderr, "[err] unable to allocate for decoding (%zu bytes)\n",
-                encoded_size);
+        ERROR("unable to allocate for decoding (%zu bytes)\n", encoded_size);
         return -1;
     }
-	
-	for(i = 0; i < encoded_size; i++) {
-		c = encoded[i];
-		if(escape) {
-			c = (unsigned char)(c-106);
+
+    for(i = 0; i < encoded_size; i++) {
+        c = encoded[i];
+        if(escape) {
+            c = (unsigned char)(c-106);
             escape = false;
-		}
+        }
         else if(c == ESC) {
             escape = true;
-			continue;
-		}
+            continue;
+        }
         else if(c == LF || c == CR) {
-			continue;
-		} 
+            continue;
+        } 
         else {
-			c = (unsigned char)(c-42);
-		}
+            c = (unsigned char)(c-42);
+        }
         decoded[decoded_size] = c;
         decoded_size++;
 #ifdef YENC_CHECK_CRC
-		yenc_crc_update(&crc, c);
+        yenc_crc_update(&crc, c);
 #endif
-	}
+    }
 
 #ifdef YENC_CHECK_CRC
     if((unsigned int)(crc ^ 0xFFFFFFFF) != valid_crc) {
-        fprintf(stderr, "[err] invalid crc checksum (%08x/%08x)\n", 
+        ERROR("invalid crc checksum (%08x/%08x)\n", 
                 (unsigned int)(crc ^ 0xFFFFFFFF), valid_crc);
         return -1;
     }
@@ -137,8 +134,7 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
 
 #ifdef YENC_CHECK_SIZE
     if(decoded_size != valid_size) {
-        fprintf(stderr, "[err] invalid size (%d/%d)\n", decoded_size,
-                valid_size);
+        ERROR("invalid size (%d/%d)\n", decoded_size, valid_size);
         return -1;
     }
 #endif
@@ -147,8 +143,7 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
     if(decoded_size < encoded_size) {
         decoded_realloc = realloc(decoded, decoded_size);
         if(decoded_realloc == NULL) {
-            fprintf(stderr, "[err] unable to (re)allocate buffer (%zu)\n",
-                    decoded_size);
+            ERROR("unable to (re)allocate buffer (%zu)\n", decoded_size);
             FREE(decoded);
             return -1;
         }
@@ -157,7 +152,7 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
 
     *p_decoded = (unsigned char*)decoded;
 
-    LOG("[info] decoded yEnc data (%d bytes)\n", decoded_size);
+    INFO("decoded yEnc data (%zu bytes)\n", decoded_size);
 
     return decoded_size;
 }

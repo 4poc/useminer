@@ -7,7 +7,7 @@ uint64_t fdsize(FILE* fd)
 
     /* seek to end of file*/
     if(fseek(fd, 0, SEEK_END) != 0) {
-        fprintf(stderr, "Error determine filesize, fseek error.\n");
+        ERROR("unable to determine filesize, fseek error.\n");
         return -1;
     }
 

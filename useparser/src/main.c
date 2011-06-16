@@ -35,56 +35,58 @@ int main(int argc, const char* argv[])
     char *plain = NULL, *line = NULL;
     size_t plain_size=0;
 
-    printf("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
-    printf(" ---------------------------------- \n");
+    /* to measure the speed of reading the file */
+    uint64_t time_start, count_chunks=0;
+
+    INFO("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
+    INFO(" ---------------------------------- \n");
 
     if(argc != 2) {
-        fprintf(stderr, "[err] you need to specify a filename\n\n" \
-                "Usage: %s <FILE>\n", argv[0]);
+        ERROR("you need to specify the <FILE> parameter\n\n" \
+                "Usage: %s <FILE>\n\nFILE can be a filename or - " \
+                "to read from standard input instead.\n", argv[0]);
         return -1;
     }
     fname = argv[1];
     if((fd = fopen(fname, "r")) == NULL) {
-        fprintf(stderr, "[err] unable to open '%s' (errno:%d)!\n", 
-                fname, errno);
+        ERROR("unable to open '%s' (errno:%d)!\n", fname, errno);
         return -1;
     }
 
     fsize = fdsize(fd);
     if(fsize == -1) {
-        fprintf(stderr, "[err] unable to determine filesize (errno:%d)!\n", 
-                errno);
+        ERROR("unable to determine filesize (errno:%d)!\n", errno);
         return -1;
     }
-    LOG("[info] opened file %s (size: %zu byte | %0.2f mbyte)\n", 
+    INFO("opened file %s (size: %zu byte | %0.2f mbyte)\n", 
             fname, fsize, (fsize / 1024.0 / 1024.0));
 
     /* sigint (C-c) aborts file read */
     signal(SIGINT, sigint_handler);
 
+    time_start = mstime();
     while(feof(fd) == 0 && !abort_fread) {
         if(fread(&fchunk, sizeof(char), FILE_CHUNK_SIZE, fd) != FILE_CHUNK_SIZE 
                 && ferror(fd) != 0) {
-            fprintf(stderr, "[err] an fread error occured\n");
+            ERROR("fread error occured\n");
             break;
         }
+        count_chunks++;
 
         /* grow buffer to store chunk */
         if(fbuffer == NULL) {
             fbuffer = malloc(FILE_CHUNK_SIZE);
             fbuffer_total = FILE_CHUNK_SIZE;
-            LOG("[info] allocate ybuf memory (%d bytes)\n", FILE_CHUNK_SIZE);
+            DEBUG("allocate ybuf memory (%d bytes)\n", FILE_CHUNK_SIZE);
         }
         else if(fbuffer_total - fbuffer_used < FILE_CHUNK_SIZE) {
-            
             tmp = fbuffer_total 
                 - (fbuffer_total - fbuffer_used) /* ignore the unused bytes */ 
                 + FILE_CHUNK_SIZE /* the chunk that gets copied */
                 + 1; /* reserve one byte for null-byte terminator */ 
             fbuffer_realloc = realloc(fbuffer, tmp);
             if(fbuffer_realloc == NULL) {
-                fprintf(stderr, "[err] unable to (re)allocate memory " \
-                        "(%zu bytes)\n", tmp);
+                ERROR("unable to (re)allocate memory (%zu bytes)\n", tmp);
                 break;
             }
             fbuffer = fbuffer_realloc;
@@ -105,12 +107,14 @@ int main(int argc, const char* argv[])
             *end_of_message = '\0'; /* null-byte terminate end of message, 
                                        so we can use string functions */
 
-            LOG("[info] end of message reached\n");
+            INFO("end of message reached (current speed: %0.2fmb/s)\n",
+                    (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0) / 
+                    ((mstime()-time_start)/1000.0)  );
 
             /* decode yEnc encoded data */
             yenc_decode_size = yenc_decode(fbuffer, &yenc_decode_buffer);
             if(yenc_decode_size == -1) {
-                fprintf(stderr, "[err] yenc decoding error\n");
+                ERROR("yenc decoding error\n");
                 return -1;
             }
 
@@ -120,7 +124,7 @@ int main(int argc, const char* argv[])
                                       &plain);
 
             if(plain_size == -1) {
-                fprintf(stderr, "[err] zlib inflate error\n");
+                ERROR("zlib inflate error\n");
                 return -1;
             }
             FREE(yenc_decode_buffer);
@@ -143,6 +147,7 @@ int main(int argc, const char* argv[])
                     }
                 }
             }
+            DEBUG("read %d lines from message chunk\n", i);
             FREE(plain);
             //exit(0);
             
@@ -152,16 +157,14 @@ int main(int argc, const char* argv[])
             else {
                 strcpy(fbuffer, end_of_message+5);
                 fbuffer_used = strlen(fbuffer);
-                LOG("[info] moved remaining memory " \
+                DEBUG("moved remaining memory " \
                         "(used:%zu, total:%zu size:%zu)\n", 
                         fbuffer_used, fbuffer_total,strlen(fbuffer));
             }
         }
     }
 
-    if(fbuffer != NULL) {
-        FREE(fbuffer);
-    }
+    FREE(fbuffer);
 
     fclose(fd);
 
@@ -170,7 +173,7 @@ int main(int argc, const char* argv[])
 
 void sigint_handler(int dummy)
 {
-    printf("\n >sigint signal caught< \n");
+    INFO("\n >sigint signal caught< \n");
     abort_fread = true;
 }
 

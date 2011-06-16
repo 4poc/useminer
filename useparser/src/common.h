@@ -8,21 +8,41 @@
 #include <string.h>
 
 /* some definitions / compile-time configurations */
-
 #define VERSION         "0.1"
-#define DEBUG                           /* activates more or less useful debug information */
+/* logging/message stuff there are err, dbg and info messages that must be 
+ * configured during compilation: */
+#define ENABLE_ERROR
+#define ENABLE_DEBUG
+#define ENABLE_INFO
 #define FILE_CHUNK_SIZE 1024 * 32       /* how many bytes, fread should read at once */
 /* #define YENC_CHECK_SIZE                 yenc decoding tests for correct size */
 #define YENC_CHECK_CRC                  /* yenc decoding tests for correct CRC */
 
-#ifdef DEBUG
-    #define LOG(...)    fprintf(stdout, __VA_ARGS__)
+
+/* some useful makros */
+
+#define FREE(ptr)       if(ptr != NULL) {   \
+                            free(ptr);      \
+                            ptr = NULL;     \
+                        }
+
+#ifdef ENABLE_ERROR
+    #define ERROR(...)    fprintf(stderr, "[error] " __VA_ARGS__);
 #else
-    #define LOG(...)
+    #define ERROR(...)
 #endif
 
-#define FREE(ptr)       free(ptr); \
-                        ptr = NULL;
+#ifdef ENABLE_DEBUG
+    #define DEBUG(...)    printf("[debug] " __VA_ARGS__);
+#else
+    #define DEBUG(...)
+#endif
+
+#ifdef ENABLE_INFO
+    #define INFO(...)    printf("[info] " __VA_ARGS__);
+#else
+    #define INFO(...)
+#endif
 
 
 /* and some helpful functions */

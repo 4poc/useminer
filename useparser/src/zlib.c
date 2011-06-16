@@ -23,7 +23,7 @@ size_t zlib_inflate(unsigned char *in_buffer, size_t in_size, char **p_out_buffe
     /* allocate first chunk of out buffer */
     out_buffer = out_cur = malloc(out_size);
     if(out_buffer == NULL) {
-        fprintf(stderr, "Error allocate output buffer!\n");
+        ERROR("unable to allocate output buffer!\n");
         return -1;
     }
 
@@ -49,9 +49,8 @@ size_t zlib_inflate(unsigned char *in_buffer, size_t in_size, char **p_out_buffe
         out_realloc = realloc(out_buffer, out_size);
         if(!out_realloc) {
             inflateEnd(&strm);
-            free(out_buffer);
-            fprintf(stderr, "[err] unable to grow out buffer (%zu bytes)\n", 
-                    out_size);
+            FREE(out_buffer);
+            ERROR("unable to grow out buffer (%zu bytes)\n", out_size);
             return -1;
         }
         out_buffer = out_realloc;

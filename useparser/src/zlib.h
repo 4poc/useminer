@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <zlib.h>
 
+#include "common.h"
+
 #define ZLIB_CHUNK_SIZE     16384
 #define ZLIB_WINDOW_BITS    -15
 

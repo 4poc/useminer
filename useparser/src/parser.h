@@ -2,6 +2,8 @@
 #define _PARSER_H
 
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 typedef struct {
@@ -26,6 +28,23 @@ typedef struct {
  * TODO: order according to overview.fmt
  */
 raw_article_t raw_parse_line(char *line);
+
+/**
+ * Parse/splice subject line for yEnc multipart file number and total.
+ *
+ * This function searches for the following pattern: /[ ]?\((\d+)\/(\d+)\)$/ the
+ * first and last match groups are stored within the num and total pointers.
+ * The matched pattern is removed/truncated from the subject line.
+ * Example:
+ *
+ * Subject: Stuff - [13/123] - "stuff.part013.rar" yEnc (12/31)
+ *
+ * Results in:
+ * Arguments: *subject = "Stuff - [13/123] - "stuff.part013.rar" yEnc"
+ *            *num = 12; *total = 31;
+ * Returns: true
+ */
+bool parse_subject(char *subject, uint16_t *num, uint16_t *total);
 
 #endif
 

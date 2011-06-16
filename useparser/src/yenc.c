@@ -152,7 +152,7 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
 
     *p_decoded = (unsigned char*)decoded;
 
-    INFO("decoded yEnc data (%zu bytes)\n", decoded_size);
+    DEBUG("decoded yEnc data (%zu bytes)\n", decoded_size);
 
     return decoded_size;
 }

@@ -16,6 +16,8 @@ raw_article_t raw_parse_line(char *line)
         line = p;
     }
 
+    /* the order and presence of each field should be queried from the server
+     * via show/list/view overview.fmt */
     raw.article_num = parts[0];
     raw.subject     = parts[1];
     raw.from        = parts[2];
@@ -27,5 +29,42 @@ raw_article_t raw_parse_line(char *line)
     raw.xref        = parts[8];
 
     return raw;
+}
+
+bool parse_subject(char *subject, uint16_t *num, uint16_t *total)
+{
+    char *tmp, *open, *close, *slash;
+
+    if((!(open = strrchr(subject, '('))) ||
+       (!(close = strrchr(subject, ')'))) || 
+       (!(slash = strchr(open, '/'))) ||
+       slash > close || 
+       open > close) {
+        return false;
+    }
+
+    /* convert to 16 bit integers */
+    *slash = '\0';
+    *num = strtol(open+1, &tmp, 10);
+    if(*tmp) {
+        *slash = '/'; /* restore if invalid number */ 
+        return false;
+    }
+    *close = '\0';
+    *total = strtol(slash+1, &tmp, 10);
+    if(*tmp) {
+        *close = ')'; 
+        return false;
+    }
+
+    /* null-byte terminate the subject string before the (num/total) part */
+    if(open[-1] == ' ') {
+        open[-1] = '\0';
+    }
+    else {
+        *open = '\0';
+    }
+
+    return true;
 }
 

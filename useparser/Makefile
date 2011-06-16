@@ -1,6 +1,7 @@
 
 CC=gcc
-CFLAGS=-c -Wall -pedantic -O3 -std=c99
+# CFLAGS=-c -Wall -pedantic -O3 -std=c99
+CFLAGS=-c -Wall -pedantic -std=c99 -g
 
 all: useparser
 

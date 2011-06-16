@@ -37,6 +37,7 @@ int main(int argc, const char* argv[])
 
     /* to measure the speed of reading the file */
     uint64_t time_start, count_chunks=0;
+    uint16_t est_min, est_sec;
 
     INFO("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
     INFO(" ---------------------------------- \n");
@@ -58,7 +59,7 @@ int main(int argc, const char* argv[])
         ERROR("unable to determine filesize (errno:%d)!\n", errno);
         return -1;
     }
-    INFO("opened file %s (size: %zu byte | %0.2f mbyte)\n", 
+    INFO("opened file %s (size: %zu B | %0.2f MiB)\n", 
             fname, fsize, (fsize / 1024.0 / 1024.0));
 
     /* sigint (C-c) aborts file read */
@@ -107,9 +108,21 @@ int main(int argc, const char* argv[])
             *end_of_message = '\0'; /* null-byte terminate end of message, 
                                        so we can use string functions */
 
-            INFO("end of message reached (current speed: %0.2fmb/s)\n",
+            est_min = 0;
+            est_sec = (fsize - count_chunks * FILE_CHUNK_SIZE) / 
+                ((count_chunks * FILE_CHUNK_SIZE) /
+                 ((mstime()-time_start)/1000.0));
+            if(est_sec >= 60) {
+                est_min = est_sec / 60;
+                est_sec -= est_min * 60;
+            }
+            printf("\x1b[1Kdecode xover message.. " \
+                   "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min])\r",
+                    (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0),
                     (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0) / 
-                    ((mstime()-time_start)/1000.0)  );
+                    ((mstime()-time_start)/1000.0),
+                    est_min,
+                    est_sec);
 
             /* decode yEnc encoded data */
             yenc_decode_size = yenc_decode(fbuffer, &yenc_decode_buffer);
@@ -137,9 +150,14 @@ int main(int argc, const char* argv[])
 
                     /* process the newsgroup article header line */
                     raw_article_t raw = raw_parse_line(line);
-                    raw.p--; raw.p++;
-                    //printf("Subject: %s\n", raw.subject);
-                    /* TODO: do "stuff" -.- */
+                    uint16_t num, total;
+                    if(parse_subject(raw.subject, &num, &total)) {
+                        printf(" ---> ( %d / %d )\n", num, total);
+                        printf("Subject: %s\n\n", raw.subject);
+                    }
+                    else {
+                        // printf("invalid: %s\n", raw.subject);
+                    }
 
                     /* proceed with next line */
                     if(i+2 < plain_size) {
@@ -149,7 +167,7 @@ int main(int argc, const char* argv[])
             }
             DEBUG("read %d lines from message chunk\n", i);
             FREE(plain);
-            //exit(0);
+            exit(0);
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
                 /* do nothing (unlikely) */
@@ -173,7 +191,7 @@ int main(int argc, const char* argv[])
 
 void sigint_handler(int dummy)
 {
-    INFO("\n >sigint signal caught< \n");
+    printf("\n\n >sigint signal caught< \n\n");
     abort_fread = true;
 }
 

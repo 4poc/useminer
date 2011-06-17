@@ -142,6 +142,10 @@ int main(int argc, const char* argv[])
             }
             FREE(yenc_decode_buffer);
 
+            unsigned char *hash;
+            raw_article_t raw; 
+            uint16_t num, total;
+
             /* read line-wise in plaintext buffer */
             line = plain;
             for(i = 0; i < plain_size-1; i++) {
@@ -149,11 +153,10 @@ int main(int argc, const char* argv[])
                     plain[i] = '\0';
 
                     /* process the newsgroup article header line */
-                    raw_article_t raw = raw_parse_line(line);
-                    uint16_t num, total;
+                    raw = raw_parse_line(line);
+                    
                     if(parse_subject(raw.subject, &num, &total)) {
-                        printf(" ---> ( %d / %d )\n", num, total);
-                        printf("Subject: %s\n\n", raw.subject);
+                        // hash = gen_md5(raw.subject, strlen(raw.subject));
                     }
                     else {
                         // printf("invalid: %s\n", raw.subject);
@@ -164,10 +167,10 @@ int main(int argc, const char* argv[])
                         line = &plain[i+2];
                     }
                 }
-            }
+            } /* end line by line parsing */
             DEBUG("read %d lines from message chunk\n", i);
+            //FREE(hash);
             FREE(plain);
-            exit(0);
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
                 /* do nothing (unlikely) */

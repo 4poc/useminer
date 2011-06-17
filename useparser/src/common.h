@@ -2,17 +2,20 @@
 #define _COMMON_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
+
+#include "md5.h"
 
 /* some definitions / compile-time configurations */
 #define VERSION         "0.1"
 /* logging/message stuff there are err, dbg and info messages that must be 
  * configured during compilation: */
 #define ENABLE_ERROR
-#define ENABLE_DEBUG
+// #define ENABLE_DEBUG
 #define ENABLE_INFO
 #define FILE_CHUNK_SIZE 1024 * 32       /* how many bytes, fread should read at once */
 /* #define YENC_CHECK_SIZE                 yenc decoding tests for correct size */
@@ -68,6 +71,10 @@ uint64_t mstime();
  * Returns NULL if either begin or end couldn't be found.
  */
 char *pslice(char **string, const char *begin, const char *end);
+
+/**
+ */
+unsigned char *gen_md5(unsigned char *data, size_t data_size);
 
 #endif /* _COMMON_H */
 

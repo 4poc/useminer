@@ -34,6 +34,10 @@ int main(int argc, const char* argv[])
      * read line-by-line */
     char *plain = NULL, *line = NULL;
     size_t plain_size=0;
+    /* parsing */
+    unsigned char *hash = NULL;
+    raw_article_t raw; 
+    uint16_t num, total;
 
     /* to measure the speed of reading the file */
     uint64_t time_start, count_chunks=0;
@@ -41,6 +45,15 @@ int main(int argc, const char* argv[])
 
     INFO("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
     INFO(" ---------------------------------- \n");
+
+    /* md5 test 
+    gen_md5((unsigned char*)argv[1], strlen(argv[1]), &hash);
+    for(i=0;i<16;i++){
+        printf("%02x",hash[i]);
+    }
+    printf("\n");
+    exit(0);
+    */
 
     if(argc != 2) {
         ERROR("you need to specify the <FILE> parameter\n\n" \
@@ -142,10 +155,6 @@ int main(int argc, const char* argv[])
             }
             FREE(yenc_decode_buffer);
 
-            unsigned char *hash;
-            raw_article_t raw; 
-            uint16_t num, total;
-
             /* read line-wise in plaintext buffer */
             line = plain;
             for(i = 0; i < plain_size-1; i++) {
@@ -154,9 +163,10 @@ int main(int argc, const char* argv[])
 
                     /* process the newsgroup article header line */
                     raw = raw_parse_line(line);
-                    
+
                     if(parse_subject(raw.subject, &num, &total)) {
-                        // hash = gen_md5(raw.subject, strlen(raw.subject));
+                        gen_md5(raw.subject, strlen(raw.subject), &hash);
+
                     }
                     else {
                         // printf("invalid: %s\n", raw.subject);
@@ -169,7 +179,6 @@ int main(int argc, const char* argv[])
                 }
             } /* end line by line parsing */
             DEBUG("read %d lines from message chunk\n", i);
-            //FREE(hash);
             FREE(plain);
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
@@ -184,7 +193,9 @@ int main(int argc, const char* argv[])
             }
         }
     }
+    printf("\n");
 
+    FREE(hash);
     FREE(fbuffer);
 
     fclose(fd);

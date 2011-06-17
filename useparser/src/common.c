@@ -44,21 +44,20 @@ char *pslice(char **string, const char *begin, const char *end)
     return NULL;
 }
 
-unsigned char *gen_md5(unsigned char *data, size_t data_size)
+void gen_md5(unsigned char *data, size_t data_size, unsigned char **hash)
 {
-    unsigned char *hash;
     MD5_CTX context;
 
-    hash = malloc(16 * sizeof(unsigned char));
-    if(!hash) {
+    if(!*hash) {
+        *hash = malloc(16 * sizeof(unsigned char));
+    }
+    if(!*hash) {
         ERROR("unable to allocate memory for gen_md5()\n");
-        return NULL;
+        return;
     }
 
     MD5_Init(&context);
     MD5_Update(&context, data, data_size);
-    MD5_Final(&hash[0], &context);
-
-    return hash;
+    MD5_Final(*hash, &context);
 }
 

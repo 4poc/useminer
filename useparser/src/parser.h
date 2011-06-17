@@ -6,6 +6,24 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "common.h"
+
+typedef struct {
+    char *message_id;
+    uint32_t bytes;
+} binary_part_t;
+
+typedef struct {
+    char *subject;
+    char *from;
+    uint64_t date;
+
+    char *newsgroups;
+
+    uint16_t parts_total; /* parsed from the (num/total) of the subject */
+    binary_part_t **parts; /* array of pointers to part_t structs */
+} binary_t;
+
 typedef struct {
     char *p; /* raw pointer to the start of the article header line,
                 each part of the line is null-byte terminated */
@@ -21,13 +39,13 @@ typedef struct {
     char *bytes;        /* Bytes: */
     char *lines;        /* Lines: */
     char *xref;         /* Xref:full */
-} raw_article_t; 
+} overview_t; 
 
 /**
- * Splice line string by TAB, arrange each header part.
- * TODO: order according to overview.fmt
+ * Parse the overview information from the provided line.
+ * FIXME: dynamic order and presence of fields (server specific)
  */
-raw_article_t raw_parse_line(char *line);
+overview_t parse_overview(char *line);
 
 /**
  * Parse/splice subject line for yEnc multipart file number and total.
@@ -45,6 +63,15 @@ raw_article_t raw_parse_line(char *line);
  * Returns: true
  */
 bool parse_subject(char *subject, uint16_t *num, uint16_t *total);
+
+/**
+ * Allocate new structures for binary_t
+ */
+binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *newsgroup);
+void free_binary(binary_t *binary);
+
+binary_part_t *new_binary_part(char *message_id, uint32_t bytes);
+void free_binary_part(binary_part_t *part);
 
 #endif
 

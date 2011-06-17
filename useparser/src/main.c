@@ -35,8 +35,9 @@ int main(int argc, const char* argv[])
     char *plain = NULL, *line = NULL;
     size_t plain_size=0;
     /* parsing */
+    char *newsgroup;
     unsigned char *hash = NULL;
-    raw_article_t raw; 
+    overview_t overview;
     uint16_t num, total;
 
     /* to measure the speed of reading the file */
@@ -55,13 +56,14 @@ int main(int argc, const char* argv[])
     exit(0);
     */
 
-    if(argc != 2) {
+    if(argc != 3) {
         ERROR("you need to specify the <FILE> parameter\n\n" \
-                "Usage: %s <FILE>\n\nFILE can be a filename or - " \
+                "Usage: %s <FILE> <NEWSGROUP>\n\nFILE can be a filename or - " \
                 "to read from standard input instead.\n", argv[0]);
         return -1;
     }
     fname = argv[1];
+    newsgroup = copy_string((char*)argv[2]);
     if((fd = fopen(fname, "r")) == NULL) {
         ERROR("unable to open '%s' (errno:%d)!\n", fname, errno);
         return -1;
@@ -162,10 +164,19 @@ int main(int argc, const char* argv[])
                     plain[i] = '\0';
 
                     /* process the newsgroup article header line */
-                    raw = raw_parse_line(line);
+                    overview = parse_overview(line);
 
-                    if(parse_subject(raw.subject, &num, &total)) {
-                        gen_md5(raw.subject, strlen(raw.subject), &hash);
+                    if(parse_subject(overview.subject, &num, &total)) {
+                        // gen_md5(raw.subject, strlen(raw.subject), &hash);
+
+                        // check memory cache for present binary_t
+                        binary_t *binary = new_binary(overview, num, total, newsgroup);
+                        if(!binary) {
+                            ERROR("error creating new binary?! (subject:%s)\n", overview.subject);
+                            continue;
+                        }
+                        
+                        free_binary(binary);
 
                     }
                     else {
@@ -196,6 +207,7 @@ int main(int argc, const char* argv[])
     printf("\n");
 
     FREE(hash);
+    FREE(newsgroup);
     FREE(fbuffer);
 
     fclose(fd);

@@ -78,5 +78,7 @@ char *pslice(char **string, const char *begin, const char *end);
 
 extern void gen_md5(unsigned char *data, size_t data_size, unsigned char **hash);
 
+char *copy_string(char *str);
+
 #endif /* _COMMON_H */
 

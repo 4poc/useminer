@@ -1,11 +1,11 @@
 #include "parser.h"
 
-raw_article_t raw_parse_line(char *line) 
+overview_t parse_overview(char *line)
 {
     char *p = line, *parts[9];
     int i;
-    raw_article_t raw;
-    raw.p = line;
+    overview_t overview;
+    overview.p = line;
 
     for(i = 0; i < 9 && p != NULL; i++) {
         p = strchr(p, '\t');
@@ -18,17 +18,17 @@ raw_article_t raw_parse_line(char *line)
 
     /* the order and presence of each field should be queried from the server
      * via show/list/view overview.fmt */
-    raw.article_num = parts[0];
-    raw.subject     = parts[1];
-    raw.from        = parts[2];
-    raw.date        = parts[3];
-    raw.message_id  = parts[4];
-    raw.ref         = parts[5];
-    raw.bytes       = parts[6];
-    raw.lines       = parts[7];
-    raw.xref        = parts[8];
+    overview.article_num = parts[0];
+    overview.subject     = parts[1];
+    overview.from        = parts[2];
+    overview.date        = parts[3];
+    overview.message_id  = parts[4];
+    overview.ref         = parts[5];
+    overview.bytes       = parts[6];
+    overview.lines       = parts[7];
+    overview.xref        = parts[8];
 
-    return raw;
+    return overview;
 }
 
 bool parse_subject(char *subject, uint16_t *num, uint16_t *total)
@@ -66,5 +66,85 @@ bool parse_subject(char *subject, uint16_t *num, uint16_t *total)
     }
 
     return true;
+}
+
+binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *newsgroup)
+{
+    binary_t *binary;
+
+    binary = malloc(sizeof(binary_t));
+    if(!binary) {
+        ERROR("unable to allocate memory for binary_t");
+        return NULL;
+    }
+
+    binary->subject = copy_string(overview.subject);
+    binary->from = copy_string(overview.from);
+
+    // parse date
+    // ...
+
+    binary->newsgroups = copy_string(newsgroup);
+    /* parse xref for other newsgroups, and append */
+
+    binary->parts_total = total;
+    /* allocate for all parts */
+    binary->parts = malloc(sizeof(binary_part_t*) * total);
+    DEBUG("memory allocation for ->parts, %d\n", total * sizeof(binary_part_t*));
+    if(!binary->parts) {
+        ERROR("unable to allocate memory for binary_t.parts");
+        return NULL;
+    }
+    memset(binary->parts, 0, sizeof(binary_part_t*) * total);
+    if(num > 1 && num <= total) {
+        binary->parts[num-1] = new_binary_part(overview.message_id, atoi(overview.bytes));
+    }
+
+    return binary;
+}
+
+void free_binary(binary_t *binary)
+{
+    if(binary == NULL) {
+        return;
+    }
+
+    FREE(binary->subject);
+    FREE(binary->from);
+    FREE(binary->newsgroups);
+
+    DEBUG("free binary->parts\n");
+    for(int i=0; i<binary->parts_total;i++){
+        if(binary->parts[i] != NULL) {
+            printf("\n\nparts[%d]->message_id: %s\n\n", i, binary->parts[i]->message_id);
+        }
+        free_binary_part(binary->parts[i]);
+    }
+    FREE(binary->parts);
+
+    FREE(binary);
+}
+
+binary_part_t *new_binary_part(char *message_id, uint32_t bytes)
+{
+    binary_part_t *binary_part;
+    binary_part = malloc(sizeof(binary_part));
+    if(!binary_part) {
+        ERROR("unable to allocate memory for binary_part_t");
+        return NULL;
+    }
+    binary_part->message_id = copy_string(message_id);
+    binary_part->bytes = bytes;
+    return binary_part;
+}
+
+void free_binary_part(binary_part_t *part)
+{
+    if(!part) {
+        return;
+    }
+    DEBUG("free message id: %s\n", part->message_id);
+    FREE(part->message_id);
+    FREE(part);
 }
 

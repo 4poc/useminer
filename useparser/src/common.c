@@ -50,6 +50,7 @@ void gen_md5(unsigned char *data, size_t data_size, unsigned char **hash)
 
     if(!*hash) {
         *hash = malloc(16 * sizeof(unsigned char));
+        DEBUG("allocate memory for md5 at %x\n", *hash);
     }
     if(!*hash) {
         ERROR("unable to allocate memory for gen_md5()\n");
@@ -59,5 +60,20 @@ void gen_md5(unsigned char *data, size_t data_size, unsigned char **hash)
     MD5_Init(&context);
     MD5_Update(&context, data, data_size);
     MD5_Final(*hash, &context);
+}
+
+char *copy_string(char *str)
+{
+    char *str_copy;
+
+    str_copy = malloc(strlen(str) + 1); /* ? +1 nullbyte?*/
+    if(!str_copy) {
+        ERROR("unable to allocate memory for string copy\n");
+        return NULL;
+    }
+
+    strcpy(str_copy, str);
+
+    return str_copy;
 }
 

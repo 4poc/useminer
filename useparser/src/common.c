@@ -77,3 +77,20 @@ char *copy_string(char *str)
     return str_copy;
 }
 
+char *join_string(char *first, char *second)
+{
+    char *joined = NULL;
+    size_t first_size = strlen(first);
+
+    joined = malloc(first_size + strlen(second) + 1);
+    if(!joined) {
+        ERROR("unable to allocate memory to join strings!\n");
+        return NULL;
+    }
+
+    strcpy(joined, first); // optim.
+    strcpy(joined + first_size, second);
+
+    return joined;
+}
+

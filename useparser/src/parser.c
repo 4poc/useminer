@@ -86,11 +86,12 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
 
     binary->newsgroups = copy_string(newsgroup);
     /* parse xref for other newsgroups, and append */
+    printf("parse xref: %s\n", overview.xref);
 
     binary->parts_total = total;
     /* allocate for all parts */
     binary->parts = malloc(sizeof(binary_part_t*) * total);
-    DEBUG("memory allocation for ->parts, %d\n", total * sizeof(binary_part_t*));
+    //DEBUG("memory allocation for ->parts, %d\n", total * sizeof(binary_part_t*));
     if(!binary->parts) {
         ERROR("unable to allocate memory for binary_t.parts");
         return NULL;
@@ -113,11 +114,7 @@ void free_binary(binary_t *binary)
     FREE(binary->from);
     FREE(binary->newsgroups);
 
-    DEBUG("free binary->parts\n");
     for(int i=0; i<binary->parts_total;i++){
-        if(binary->parts[i] != NULL) {
-            printf("\n\nparts[%d]->message_id: %s\n\n", i, binary->parts[i]->message_id);
-        }
         free_binary_part(binary->parts[i]);
     }
     FREE(binary->parts);
@@ -143,7 +140,6 @@ void free_binary_part(binary_part_t *part)
     if(!part) {
         return;
     }
-    DEBUG("free message id: %s\n", part->message_id);
     FREE(part->message_id);
     FREE(part);
 }

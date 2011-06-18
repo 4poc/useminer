@@ -165,9 +165,15 @@ int main(int argc, const char* argv[])
 
                     /* process the newsgroup article header line */
                     overview = parse_overview(line);
-
                     if(parse_subject(overview.subject, &num, &total)) {
-                        // gen_md5(raw.subject, strlen(raw.subject), &hash);
+                        char *hash_data = join_string(overview.subject, overview.from);
+                        //printf("data hash: %s\n", hash_data);
+                        gen_md5(hash_data, strlen(hash_data), &hash);
+                        FREE(hash_data);
+
+                        /* for(int j=0;j<16;j++){
+                        printf("%02x",hash[j]); }
+                        printf("\n"); */
 
                         // check memory cache for present binary_t
                         binary_t *binary = new_binary(overview, num, total, newsgroup);
@@ -177,7 +183,6 @@ int main(int argc, const char* argv[])
                         }
                         
                         free_binary(binary);
-
                     }
                     else {
                         // printf("invalid: %s\n", raw.subject);
@@ -191,6 +196,7 @@ int main(int argc, const char* argv[])
             } /* end line by line parsing */
             DEBUG("read %d lines from message chunk\n", i);
             FREE(plain);
+            exit(0);
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
                 /* do nothing (unlikely) */

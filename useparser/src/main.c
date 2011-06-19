@@ -176,6 +176,7 @@ int main(int argc, const char* argv[])
                         printf("\n"); */
 
                         // check memory cache for present binary_t
+                        // this really parses the strings in the overview_t structure.
                         binary_t *binary = new_binary(overview, num, total, newsgroup);
                         if(!binary) {
                             ERROR("error creating new binary?! (subject:%s)\n", overview.subject);

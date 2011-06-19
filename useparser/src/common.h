@@ -15,7 +15,7 @@
 /* logging/message stuff there are err, dbg and info messages that must be 
  * configured during compilation: */
 #define ENABLE_ERROR
-// #define ENABLE_DEBUG
+#define ENABLE_DEBUG
 #define ENABLE_INFO
 #define FILE_CHUNK_SIZE 1024 * 32       /* how many bytes, fread should read at once */
 /* #define YENC_CHECK_SIZE                 yenc decoding tests for correct size */

@@ -84,9 +84,8 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
     // parse date
     // ...
 
-    binary->newsgroups = copy_string(newsgroup);
     /* parse xref for other newsgroups, and append */
-    printf("parse xref: %s\n", overview.xref);
+    binary->newsgroups = parse_xref(overview.xref);
 
     binary->parts_total = total;
     /* allocate for all parts */
@@ -112,7 +111,8 @@ void free_binary(binary_t *binary)
 
     FREE(binary->subject);
     FREE(binary->from);
-    FREE(binary->newsgroups);
+
+    free_newsgroup(binary->newsgroups);
 
     for(int i=0; i<binary->parts_total;i++){
         free_binary_part(binary->parts[i]);
@@ -142,5 +142,77 @@ void free_binary_part(binary_part_t *part)
     }
     FREE(part->message_id);
     FREE(part);
+}
+
+void new_newsgroup(char *name, newsgroup_t *newsgroup)
+{
+    if(!newsgroup) {
+        newsgroup = malloc(sizeof(newsgroup_t));
+        if(!newsgroup) {
+            ERROR("unable to allocate memory for newsgroup_t root.\n");
+            return;
+        }
+        newsgroup->name = copy_string(name);
+        newsgroup->next = NULL;
+        return;
+    }
+    new_newsgroup(name, newsgroup->next);
+}
+
+void free_newsgroup(newsgroup_t *newsgroup)
+{
+    if(!newsgroup) {
+        return;
+    }
+    if(newsgroup->next) {
+        free_newsgroup(newsgroup->next);
+    }
+
+    FREE(newsgroup->name);
+    FREE(newsgroup);
+}
+
+bool search_newsgroup(newsgroup_t *newsgroup, char *name)
+{
+    /* search for newsgroup within list */
+    if(!newsgroup) {
+        return false;
+    }
+    else if(strcmp(newsgroup->name, name) == 0) {
+        return true;
+    }
+    else {
+        return search_newsgroup(newsgroup->next, name);
+    }
+}
+
+/**
+ * Parse the Xref: header into newsgroup_t structure
+ * 
+ * / ([a-zA-Z0-9\.]+):[0-9]+/g
+ */
+newsgroup_t *parse_xref(char *xref)
+{
+    newsgroup_t *newsgroup = NULL;
+    char *p, *colon=NULL, *end, *token;
+    p = xref;
+    end = p + strlen(xref); // points to null-byte
+    p+=7; /* + "Xref: " */
+    token = p;
+
+    /* split by whitespace */
+    for(p; p < end; p++) {
+        if(*p == ' '){
+            *p = '\0';
+            // token = the word without whitespace:
+            if((colon = strchr(token, ':'))) {
+                *colon = '\0';
+                new_newsgroup(token, newsgroup);
+            }
+            token = p+1;
+        }
+    }
+
+    return newsgroup;
 }
 

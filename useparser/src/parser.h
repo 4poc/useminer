@@ -8,6 +8,12 @@
 
 #include "common.h"
 
+struct newsgroup {
+    char *name;
+    struct newsgroup *next; 
+};
+typedef struct newsgroup newsgroup_t;
+
 typedef struct {
     char *message_id;
     uint32_t bytes;
@@ -18,7 +24,7 @@ typedef struct {
     char *from;
     uint64_t date;
 
-    char *newsgroups;
+    newsgroup_t *newsgroups;
 
     uint16_t parts_total; /* parsed from the (num/total) of the subject */
     binary_part_t **parts; /* array of pointers to part_t structs */
@@ -40,6 +46,7 @@ typedef struct {
     char *lines;        /* Lines: */
     char *xref;         /* Xref:full */
 } overview_t; 
+
 
 /**
  * Parse the overview information from the provided line.
@@ -72,6 +79,11 @@ void free_binary(binary_t *binary);
 
 binary_part_t *new_binary_part(char *message_id, uint32_t bytes);
 void free_binary_part(binary_part_t *part);
+
+void new_newsgroup(char *name, newsgroup_t *newsgroup);
+void free_newsgroup(newsgroup_t *newsgroup);
+bool search_newsgroup(newsgroup_t *newsgroup, char *name);
+newsgroup_t *parse_xref(char *xref);
 
 #endif
 

@@ -82,10 +82,7 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
     binary->from = copy_string(overview.from);
 
     // parse date
-    parse_date(overview.date);
-    printf("date: %s\n", overview.date);
-    // ...
-    exit(0);
+    binary->date = parse_date(overview.date);
 
     /* parse xref for other newsgroups, and append */
     if(overview.xref) {
@@ -222,73 +219,68 @@ newsgroup_t *parse_xref(char *xref)
 
 uint64_t parse_date(char *date)
 {
-    // I'm not sure how to get the array size of usenet_date_format
-    //
-    int i;
     uint8_t timezone_hours=0;
+    uint64_t unixtime;
     char *result, *num_result;
-    struct tm time;
+    char strf[21];
     bool valid = false;
-
-    printf("date: %s\n", date);
-    printf("size: %d\n", sizeof(usenet_date_format));
+    int i;
+    struct tm time;
 
     memset(&time, 0, sizeof(struct tm));
 
-    for(i=0; i<13; i++) {
-        printf("\nformat: %s\n", usenet_date_format[i]);
-        result = strptime(date, usenet_date_format[i], &time);
-        printf("raw result: %s\n", result);
+    for(i=0; i<ARRAY_LEN(date_formats); i++) {
+        result = strptime(date, date_formats[i], &time);
 
-            /* this sucks! srsly */
-        if(result && strlen(result) == 6 && /* remaining (unable to parse) timezone */
-            result[0] == ' ' && (result[1] == '+' || result[1] == '-')) {
-            printf("(%s)\n", result+2);
-            timezone_hours = strtol(result+2, &num_result, 10);
-            if(*num_result || timezone_hours < 100) { /* invalid hours */
+        /* this sucks! srsly */
+        if(result && strlen(result) >= 3 && /* remaining (unable to parse) timezone */
+            result[0] == ' ') {
+        
+            if(result[1] == '+' || result[1] == '-') { /* numeric timezone */
+
+                timezone_hours = strtol(result+2, &num_result, 10);
+                if(*num_result || timezone_hours < 100) { /* invalid hours */
+                }
+                else {
+                  if(result[1] == '+') {
+                      time.tm_hour += (timezone_hours / 100);
+                  }
+                  else {
+                      time.tm_hour -= (timezone_hours / 100);
+                  }
+                }
+                valid = true;
+                break;
+
             }
-            else {
-              if(result[1] == '+') {
-                  time.tm_hour += (timezone_hours / 100);
-              }
-              else {
-                  time.tm_hour -= (timezone_hours / 100);
-              }
+            else { /* TODO: do this the proper(?) way.. */
+                if(strcmp(result+1, "GMT") == 0) {
+                    /* do nothing, +/- 0 offset */
+                    valid=true;
+                    break;
+                }
             }
-            valid = true;
-            break;
         }
         else if(result && result[0] == '\0') { /* assume the timezone is UTC?*/
             /*timezone is gmt? */
             valid = true;
             break;
         }
-
-        printf("<invalid date format>\n");
+        else if(result) {
+            ERROR("format invalid, remaining: %s\n", result);
+        }
     }
     if(valid) {
-        printf("hour/min/sec: %d:%d:%d\n", time.tm_hour, time.tm_min, time.tm_sec);
+        /* convert to unix epoch */
+        strftime(&strf, sizeof(strf), "%s", &time);
+
+        unixtime = strtol(strf, &num_result, 10);
+        if(!*num_result) { /* valid unix timestamp */
+            return unixtime;
+        }
     }
-    else {
-        ERROR("unable to parse date: %s\n", date);
-    }
-    /*
-    struct tm {
-        int tm_sec;        * seconds *
-        int tm_min;        * minutes *
-        int tm_hour;       * hours *
-        int tm_mday;       * day of the month *
-        int tm_mon;        * month *
-        int tm_year;       * year *
-        int tm_wday;       * day of the week *
-        int tm_yday;       * day in the year *
-        int tm_isdst;      * daylight saving time *
-    };
-    */
 
-
-    return -1;
-
-    //char *strptime(const char *s, const char *format, struct tm *tm);
+    ERROR("unable to parse date: %s (remain:%s)\n", date, result);
+    return 0;
 }
 

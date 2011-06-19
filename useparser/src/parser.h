@@ -117,7 +117,7 @@ void free_binary(binary_t *binary);
  * Date parsing stuff is messy
  * http://kitenet.net/~joey/blog/entry/date_formats_of_a_decade_of_usenet/
  */
-static const char *usenet_date_format[] = {
+static const char *date_formats[] = {
     "%d %b %y %T",       
     "%a, %d %b %y %T",   
     "%a, %d-%b-%y %T",   

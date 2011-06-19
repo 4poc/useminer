@@ -47,6 +47,10 @@ int main(int argc, const char* argv[])
     INFO("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
     INFO(" ---------------------------------- \n");
 
+    /* work with UTC/GMT everywhere */
+    setenv("TZ", "UTC", 1);
+    tzset();
+
     /* md5 test 
     gen_md5((unsigned char*)argv[1], strlen(argv[1]), &hash);
     for(i=0;i<16;i++){
@@ -197,7 +201,7 @@ int main(int argc, const char* argv[])
             } /* end line by line parsing */
             DEBUG("read %d lines from message chunk\n", i);
             FREE(plain);
-            exit(0);
+            //exit(0);
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
                 /* do nothing (unlikely) */

@@ -29,6 +29,8 @@
                             ptr = NULL;     \
                         }
 
+#define ARRAY_LEN(a)    sizeof(a) / sizeof(a[0])
+
 #ifdef ENABLE_ERROR
     #define ERROR(...)    fprintf(stderr, "[error] " __VA_ARGS__);
 #else

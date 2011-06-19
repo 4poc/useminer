@@ -219,12 +219,11 @@ newsgroup_t *parse_xref(char *xref)
 
 uint64_t parse_date(char *date)
 {
-    uint8_t timezone_hours=0;
     uint64_t unixtime;
     char *result, *num_result;
     char strf[21];
     bool valid = false;
-    int i;
+    int i, timezone_hours;
     struct tm time;
 
     memset(&time, 0, sizeof(struct tm));
@@ -238,16 +237,9 @@ uint64_t parse_date(char *date)
         
             if(result[1] == '+' || result[1] == '-') { /* numeric timezone */
 
-                timezone_hours = strtol(result+2, &num_result, 10);
-                if(*num_result || timezone_hours < 100) { /* invalid hours */
-                }
-                else {
-                  if(result[1] == '+') {
-                      time.tm_hour += (timezone_hours / 100);
-                  }
-                  else {
-                      time.tm_hour -= (timezone_hours / 100);
-                  }
+                timezone_hours = strtol(result+1, &num_result, 10);
+                if(!*num_result && timezone_hours >= 100) { /* invalid hours */
+                  time.tm_hour += -1 * (timezone_hours / 100);
                 }
                 valid = true;
                 break;
@@ -276,6 +268,8 @@ uint64_t parse_date(char *date)
 
         unixtime = strtol(strf, &num_result, 10);
         if(!*num_result) { /* valid unix timestamp */
+            DEBUG("date: %s (%02d:%02d unix: %d)\n", date, time.tm_hour, 
+                    time.tm_min, unixtime);
             return unixtime;
         }
     }

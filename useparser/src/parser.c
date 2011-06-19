@@ -239,7 +239,7 @@ uint64_t parse_date(char *date)
 
                 timezone_hours = strtol(result+1, &num_result, 10);
                 if(!*num_result && timezone_hours >= 100) { /* invalid hours */
-                  time.tm_hour += -1 * (timezone_hours / 100);
+                  time.tm_hour -= (timezone_hours / 100);
                 }
                 valid = true;
                 break;

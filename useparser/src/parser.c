@@ -82,10 +82,18 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
     binary->from = copy_string(overview.from);
 
     // parse date
+    parse_date(overview.date);
+    printf("date: %s\n", overview.date);
     // ...
+    exit(0);
 
     /* parse xref for other newsgroups, and append */
-    binary->newsgroups = parse_xref(overview.xref);
+    if(overview.xref) {
+        binary->newsgroups = parse_xref(overview.xref);
+    }
+    if(!search_newsgroup(binary->newsgroups, newsgroup)) {
+        new_newsgroup(newsgroup, binary->newsgroups);
+    }
 
     binary->parts_total = total;
     /* allocate for all parts */
@@ -96,9 +104,10 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
         return NULL;
     }
     memset(binary->parts, 0, sizeof(binary_part_t*) * total);
-    if(num > 1 && num <= total) {
+    if(num > 1 && num <= total) { /* this would be an invalid article otherwise */
         binary->parts[num-1] = new_binary_part(overview.message_id, atoi(overview.bytes));
     }
+    // else { free binary; return NULL; }
 
     return binary;
 }
@@ -186,11 +195,6 @@ bool search_newsgroup(newsgroup_t *newsgroup, char *name)
     }
 }
 
-/**
- * Parse the Xref: header into newsgroup_t structure
- * 
- * / ([a-zA-Z0-9\.]+):[0-9]+/g
- */
 newsgroup_t *parse_xref(char *xref)
 {
     newsgroup_t *newsgroup = NULL;
@@ -214,5 +218,61 @@ newsgroup_t *parse_xref(char *xref)
     }
 
     return newsgroup;
+}
+
+uint64_t parse_date(char *date)
+{
+    // I'm not sure how to get the array size of usenet_date_format
+    //
+    int i;
+    char *result;
+    struct tm time;
+
+    printf("date: %s\n", date);
+    printf("size: %d\n", sizeof(usenet_date_format));
+
+    memset(&time, 0, sizeof(struct tm));
+
+    for(i=0; i<13; i++) {
+        printf("format this iter: %s\n", usenet_date_format[i]);
+        result = strptime(date, usenet_date_format[i], &time);
+        printf("what?: %s\n", result);
+        if(result && result[0] == '\0') {
+            printf("matched format: %s\n", usenet_date_format[i]);
+
+            /*
+                   size_t strftime(char *s, size_t max, const char *format,
+                                                  const struct tm *tm);
+                                                  */
+            printf("min: %d sec: %d\n", time.tm_min, time.tm_sec);
+            
+            /*
+             timezone?!
+             */
+
+
+            break;
+        }
+        else {
+        }
+    }
+    /*
+    struct tm {
+        int tm_sec;        * seconds *
+        int tm_min;        * minutes *
+        int tm_hour;       * hours *
+        int tm_mday;       * day of the month *
+        int tm_mon;        * month *
+        int tm_year;       * year *
+        int tm_wday;       * day of the week *
+        int tm_yday;       * day in the year *
+        int tm_isdst;      * daylight saving time *
+    };
+    */
+
+
+    return -1;
+
+    //char *strptime(const char *s, const char *format, struct tm *tm);
 }
 

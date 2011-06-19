@@ -225,8 +225,10 @@ uint64_t parse_date(char *date)
     // I'm not sure how to get the array size of usenet_date_format
     //
     int i;
-    char *result;
+    uint8_t timezone_hours=0;
+    char *result, *num_result;
     struct tm time;
+    bool valid = false;
 
     printf("date: %s\n", date);
     printf("size: %d\n", sizeof(usenet_date_format));
@@ -234,27 +236,41 @@ uint64_t parse_date(char *date)
     memset(&time, 0, sizeof(struct tm));
 
     for(i=0; i<13; i++) {
-        printf("format this iter: %s\n", usenet_date_format[i]);
+        printf("\nformat: %s\n", usenet_date_format[i]);
         result = strptime(date, usenet_date_format[i], &time);
-        printf("what?: %s\n", result);
-        if(result && result[0] == '\0') {
-            printf("matched format: %s\n", usenet_date_format[i]);
+        printf("raw result: %s\n", result);
 
-            /*
-                   size_t strftime(char *s, size_t max, const char *format,
-                                                  const struct tm *tm);
-                                                  */
-            printf("min: %d sec: %d\n", time.tm_min, time.tm_sec);
-            
-            /*
-             timezone?!
-             */
-
-
+            /* this sucks! srsly */
+        if(result && strlen(result) == 6 && /* remaining (unable to parse) timezone */
+            result[0] == ' ' && (result[1] == '+' || result[1] == '-')) {
+            printf("(%s)\n", result+2);
+            timezone_hours = strtol(result+2, &num_result, 10);
+            if(*num_result || timezone_hours < 100) { /* invalid hours */
+            }
+            else {
+              if(result[1] == '+') {
+                  time.tm_hour += (timezone_hours / 100);
+              }
+              else {
+                  time.tm_hour -= (timezone_hours / 100);
+              }
+            }
+            valid = true;
             break;
         }
-        else {
+        else if(result && result[0] == '\0') { /* assume the timezone is UTC?*/
+            /*timezone is gmt? */
+            valid = true;
+            break;
         }
+
+        printf("<invalid date format>\n");
+    }
+    if(valid) {
+        printf("hour/min/sec: %d:%d:%d\n", time.tm_hour, time.tm_min, time.tm_sec);
+    }
+    else {
+        ERROR("unable to parse date: %s\n", date);
     }
     /*
     struct tm {

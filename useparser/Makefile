@@ -1,7 +1,10 @@
+CC=clang
+CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L 
 
-CC=gcc
-# CFLAGS=-c -Wall -pedantic -O3 -std=c99
-CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L -g
+# gcc:
+# CC=gcc
+# CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L -g
+# -g 	for debugging
 
 all: useparser
 

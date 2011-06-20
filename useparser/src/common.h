@@ -13,7 +13,7 @@
 #define VERSION         "0.0.1"
 /* enable log level error, debug info: */
 #define ENABLE_ERROR
-#define ENABLE_DEBUG
+//#define ENABLE_DEBUG
 #define ENABLE_INFO
 #define FILE_CHUNK_SIZE 1024 * 32   /* fread chunks */
 /* #define YENC_CHECK_SIZE             yenc decoding tests for correct size */

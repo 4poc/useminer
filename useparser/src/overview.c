@@ -181,7 +181,7 @@ uint64_t parse_date(char *date)
             break;
         }
         else if(result) {
-            ERROR("format invalid, remaining: %s\n", result);
+            // ERROR("format invalid, remaining: %s\n", result);
         }
     }
     if(valid) {
@@ -190,8 +190,8 @@ uint64_t parse_date(char *date)
 
         unixtime = strtol(strf, &num_result, 10);
         if(!*num_result) { /* valid unix timestamp */
-            DEBUG("date: %s (%02d:%02d unix: %lld)\n", date, time.tm_hour, 
-                    time.tm_min, unixtime);
+            // DEBUG("date: %s (%02d:%02d unix: %lld)\n", date, time.tm_hour, 
+            //         time.tm_min, unixtime);
             return unixtime;
         }
     }

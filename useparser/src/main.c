@@ -125,9 +125,7 @@ int main(int argc, const char* argv[])
 
         /* process/consume completed multiline messages in buffer */
         while((end_of_message = strstr(fbuffer, "\r\n.\r\n")) != NULL) {
-            *end_of_message = '\0'; /* null-byte terminate end of message, 
-                                       so we can use string functions */
-
+            *end_of_message = '\0';
             est_min = 0;
             est_sec = (fsize - count_chunks * FILE_CHUNK_SIZE) / 
                 ((count_chunks * FILE_CHUNK_SIZE) /
@@ -190,7 +188,7 @@ int main(int argc, const char* argv[])
                         free_binary(binary);
                     }
                     else {
-                        // printf("invalid: %s\n", raw.subject);
+                        printf("invalid: %s\n", overview.subject);
                     }
 
                     /* proceed with next line */

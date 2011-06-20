@@ -139,11 +139,12 @@ uint64_t parse_date(char *date)
     char *result, *num_result;
     char strf[21];
     bool valid = false;
-    int i, timezone_hours;
+    int i, j, timezone_hours;
     struct tm time;
 
     memset(&time, 0, sizeof(struct tm));
 
+    /* test the most commonly used date formats in usenet */
     for(i=0; i<ARRAY_LEN(date_formats); i++) {
         result = strptime(date, date_formats[i], &time);
 
@@ -162,11 +163,15 @@ uint64_t parse_date(char *date)
                 break;
 
             }
-            else { /* TODO: do this the proper(?) way.. */
-                if(strcmp(result+1, "GMT") == 0) {
-                    /* do nothing, +/- 0 offset */
-                    valid=true;
-                    break;
+            else {
+                /* try to find a matching timezone name: */
+                for(j=0; j<ARRAY_LEN(timezone_names); j++) {
+                    if(strcmp(result+1, timezone_names[j].name) == 0) {
+                        time.tm_hour -= timezone_names[j].offset + 
+                                        timezone_names[j].dst;
+                        valid = true;
+                        break;
+                    }
                 }
             }
         }

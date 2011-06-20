@@ -52,11 +52,10 @@ static void yenc_crc_update(int32_t *crc, char c)
 }
 #endif /* YENC_CHECK_CRC */
 
-size_t yenc_decode(char *encoded, unsigned char **p_decoded)
+size_t yenc_decode(char *encoded, char **p_decoded)
 {
-    char *decoded, *decoded_realloc, *phead, *ptail, *ptmp;
     int i;
-	unsigned char c;
+    char c, *decoded, *decoded_realloc, *phead, *ptail, *ptmp;
     bool escape = false;
 #ifdef YENC_CHECK_SIZE
     int valid_size = -1;
@@ -67,7 +66,7 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
     size_t encoded_size = 0, decoded_size = 0;
 
     /* parse and slice the enclosure (ybegin and yend lines) */
-    phead = pslice(&encoded, "=ybegin ", "\r\n");
+    phead = slice_string(&encoded, "=ybegin ", "\r\n");
     ptail = strstr(encoded, "=yend");
     if(phead == NULL || ptail == NULL) {
         return -1;
@@ -77,11 +76,11 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
     *ptail = '\0'; ptail++;
 
 #ifdef YENC_CHECK_SIZE
-    ptmp = pslice(&phead, "size=", " ");
+    ptmp = slice_string(&phead, "size=", " ");
     if(ptmp != NULL) {
         valid_size = atoi(ptmp);
     }
-    ptmp = pslice(&ptail, "size=", " ");
+    ptmp = slice_string(&ptail, "size=", " ");
     if(ptmp != NULL && atoi(ptmp) != valid_size) {
         ERROR("yenc size check failed (%d/%d)\n", atoi(ptmp), valid_size);
         return -1;
@@ -150,7 +149,7 @@ size_t yenc_decode(char *encoded, unsigned char **p_decoded)
         decoded = decoded_realloc;
     }
 
-    *p_decoded = (unsigned char*)decoded;
+    *p_decoded = decoded;
 
     DEBUG("decoded yEnc data (%zu bytes)\n", decoded_size);
 

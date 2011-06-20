@@ -14,11 +14,8 @@
 #define TAB     0x09
 #define SPACE   0x20
 
-/**
- * yEnc decode string to data buffer
- * returns the size of the buffer pointed to by decoded
- */
-size_t yenc_decode(char *encoded, unsigned char **p_decoded);
+/* decode string buffer, parse yenc head and tail, return size of decode */
+size_t yenc_decode(char *encoded, char **p_decoded);
 
 #endif /* _YENC_H */
 

@@ -4,11 +4,14 @@
 #include <string.h>
 #include <signal.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "common.h"
 #include "yenc.h"
 #include "zlib.h"
-#include "parser.h"
+#include "overview.h"
+#include "binary.h"
 
 static bool abort_fread = false; 
 
@@ -26,8 +29,7 @@ int main(int argc, const char* argv[])
     size_t tmp=0, fsize=0, fbuffer_total=0, fbuffer_used=0; 
 
     /* multiline xzver responses are yEnc encoded, for decoding: */
-    char *end_of_message = NULL;
-    unsigned char *yenc_decode_buffer = NULL;
+    char *end_of_message = NULL, *yenc_decode_buffer = NULL;
     size_t yenc_decode_size=0;
 
     /* decoded buffer is zlib inflated, resulting ASCII plaintext that is 
@@ -35,8 +37,7 @@ int main(int argc, const char* argv[])
     char *plain = NULL, *line = NULL;
     size_t plain_size=0;
     /* parsing */
-    char *newsgroup;
-    unsigned char *hash = NULL;
+    char *newsgroup, *hash_data, *hash = NULL;
     overview_t overview;
     uint16_t num, total;
 
@@ -170,9 +171,8 @@ int main(int argc, const char* argv[])
                     /* process the newsgroup article header line */
                     overview = parse_overview(line);
                     if(parse_subject(overview.subject, &num, &total)) {
-                        char *hash_data = join_string(overview.subject, overview.from);
-                        //printf("data hash: %s\n", hash_data);
-                        gen_md5(hash_data, strlen(hash_data), &hash);
+                        hash_data = join_string(overview.subject, overview.from);
+                        md5(hash_data, strlen(hash_data), &hash);
                         FREE(hash_data);
 
                         /* for(int j=0;j<16;j++){

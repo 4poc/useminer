@@ -1,9 +1,9 @@
 #include "zlib.h"
 
-size_t zlib_inflate(unsigned char *in_buffer, size_t in_size, char **p_out_buffer)
+size_t zlib_inflate(char *in_buffer, size_t in_size, char **p_out_buffer)
 {
     int ret;
-    unsigned char *out_realloc, *out_buffer, *out_cur;
+    char *out_realloc, *out_buffer, *out_cur;
     size_t out_size = ZLIB_CHUNK_SIZE;
     z_stream strm;
 
@@ -18,7 +18,7 @@ size_t zlib_inflate(unsigned char *in_buffer, size_t in_size, char **p_out_buffe
         return ret;
 
     strm.avail_in = in_size;
-    strm.next_in = in_buffer;
+    strm.next_in = (unsigned char*)in_buffer;
 
     /* allocate first chunk of out buffer */
     out_buffer = out_cur = malloc(out_size);
@@ -29,7 +29,7 @@ size_t zlib_inflate(unsigned char *in_buffer, size_t in_size, char **p_out_buffe
 
     for(;;) { /* until input buffer is consumed */
         strm.avail_out = ZLIB_CHUNK_SIZE;
-        strm.next_out = out_cur;
+        strm.next_out = (unsigned char*)out_cur;
 
         ret = inflate(&strm, Z_NO_FLUSH);
         switch (ret) {
@@ -56,7 +56,7 @@ size_t zlib_inflate(unsigned char *in_buffer, size_t in_size, char **p_out_buffe
         out_buffer = out_realloc;
         out_cur = &out_buffer[out_size - ZLIB_CHUNK_SIZE];
     }
-    *p_out_buffer = (char*)out_buffer; /* FIXME: unsigned -> signed ? */
+    *p_out_buffer = out_buffer; /* FIXME: unsigned -> signed ? */
 
     inflateEnd(&strm);
     return ret == Z_STREAM_END ? out_size : -1;

@@ -10,26 +10,22 @@
 
 #include "md5.h"
 
-/* some definitions / compile-time configurations */
-#define VERSION         "0.1"
-/* logging/message stuff there are err, dbg and info messages that must be 
- * configured during compilation: */
+#define VERSION         "0.0.1"
+/* enable log level error, debug info: */
 #define ENABLE_ERROR
 #define ENABLE_DEBUG
 #define ENABLE_INFO
-#define FILE_CHUNK_SIZE 1024 * 32       /* how many bytes, fread should read at once */
-/* #define YENC_CHECK_SIZE                 yenc decoding tests for correct size */
-#define YENC_CHECK_CRC                  /* yenc decoding tests for correct CRC */
+#define FILE_CHUNK_SIZE 1024 * 32   /* fread chunks */
+/* #define YENC_CHECK_SIZE             yenc decoding tests for correct size */
+#define YENC_CHECK_CRC              /* yenc decoding tests for correct CRC */
 
-
-/* some useful makros */
 
 #define FREE(ptr)       if(ptr != NULL) {   \
                             free(ptr);      \
                             ptr = NULL;     \
-                        }
+                        } else {}
 
-#define ARRAY_LEN(a)    sizeof(a) / sizeof(a[0])
+#define ARRAY_LEN(a)    ( sizeof(a) / sizeof(a[0]) )
 
 #ifdef ENABLE_ERROR
     #define ERROR(...)    fprintf(stderr, "[error] " __VA_ARGS__);
@@ -49,40 +45,23 @@
     #define INFO(...)
 #endif
 
-
-/* and some helpful functions */
-
-/**
- * Determines the filesize of the file point to by the file descriptor.
- *
- * Uses a fseek to the end of the file and ftell to determine the size of the file.
- */
+/* determine filesize via file descriptor, uses fseek/ftell/fseek */
 uint64_t fdsize(FILE* fd);
-
-/**
- * Returns current unix epoch time in milliseconds.
- */
+/* return current unix epoch in milliseconds */
 uint64_t mstime();
+/* generate md5 hash for data */
+void md5(char *data, size_t data_size, char **hash);
 
-/**
- * Slice partial string between the begin and end substrings.
- *
+/* slice partial string between begin and end,
  * Returns pointer to the first occurence of begin.
  * The string is moved to one byte after the end.
  * The first byte of found end is null-byte terminated.
- * Returns NULL if either begin or end couldn't be found.
- */
-char *pslice(char **string, const char *begin, const char *end);
-
-/**
- */
-// void gen_md5(unsigned char *data, size_t data_size, unsigned char *hash);
-
-extern void gen_md5(unsigned char *data, size_t data_size, unsigned char **hash);
-
+ * Returns NULL if either begin or end couldn't be found.  */
+char *slice_string(char **string, const char *begin, const char *end);
+/* copy string to newly allocated memory */
 char *copy_string(char *str);
-
-char *join_string(char *first, char *second);
+/* join two strings into newly allocated memory */
+char *join_string(char *s1, char *s2);
 
 #endif /* _COMMON_H */
 

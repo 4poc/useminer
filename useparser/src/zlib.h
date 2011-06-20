@@ -11,7 +11,7 @@
 #define ZLIB_CHUNK_SIZE     16384
 #define ZLIB_WINDOW_BITS    -15
 
-size_t zlib_inflate(unsigned char *in_buffer, size_t in_size, char **p_out_buffer);
+size_t zlib_inflate(char *in_buffer, size_t in_size, char **p_out_buffer);
 
 #endif
 

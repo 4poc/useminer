@@ -27,7 +27,25 @@ uint64_t mstime()
     return (time.tv_sec * 1000) + (time.tv_usec / 1000.0 + 0.5);
 }
 
-char *pslice(char **string, const char *begin, const char *end)
+void md5(char *data, size_t data_size, char **hash)
+{
+    MD5_CTX context;
+
+    if(!*hash) {
+        *hash = malloc(16 * sizeof(char));
+        DEBUG("allocate memory for md5 at %p\n", *hash);
+    }
+    if(!*hash) {
+        ERROR("unable to allocate memory for gen_md5()\n");
+        return;
+    }
+
+    MD5_Init(&context);
+    MD5_Update(&context, data, data_size);
+    MD5_Final((unsigned char*)(*hash), &context);
+}
+
+char *slice_string(char **string, const char *begin, const char *end)
 {
     char *pbegin = NULL, *pend = NULL;
     pbegin = strstr(*string, begin);
@@ -44,23 +62,6 @@ char *pslice(char **string, const char *begin, const char *end)
     return NULL;
 }
 
-void gen_md5(unsigned char *data, size_t data_size, unsigned char **hash)
-{
-    MD5_CTX context;
-
-    if(!*hash) {
-        *hash = malloc(16 * sizeof(unsigned char));
-        DEBUG("allocate memory for md5 at %x\n", *hash);
-    }
-    if(!*hash) {
-        ERROR("unable to allocate memory for gen_md5()\n");
-        return;
-    }
-
-    MD5_Init(&context);
-    MD5_Update(&context, data, data_size);
-    MD5_Final(*hash, &context);
-}
 
 char *copy_string(char *str)
 {
@@ -77,19 +78,22 @@ char *copy_string(char *str)
     return str_copy;
 }
 
-char *join_string(char *first, char *second)
+char *join_string(char *s1, char *s2)
 {
     char *joined = NULL;
-    size_t first_size = strlen(first);
+    size_t s1_size, s2_size;
+   
+    s1_size = strlen(s1);
+    s2_size = strlen(s2);
 
-    joined = malloc(first_size + strlen(second) + 1);
+    joined = malloc(s1_size + s2_size + 1); /* + null-byte */
     if(!joined) {
         ERROR("unable to allocate memory to join strings!\n");
         return NULL;
     }
 
-    strcpy(joined, first); // optim.
-    strcpy(joined + first_size, second);
+    memcpy(joined, s1, s1_size);
+    memcpy(joined + s1_size, s2, s2_size + 1);
 
     return joined;
 }

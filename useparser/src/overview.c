@@ -31,19 +31,22 @@ overview_t parse_overview(char *line)
     return overview;
 }
 
-void new_newsgroup(char *name, newsgroup_t *newsgroup)
+void new_newsgroup(newsgroup_t **newsgroup, char *name)
 {
-    if(!newsgroup) {
-        newsgroup = malloc(sizeof(newsgroup_t));
-        if(!newsgroup) {
+    //DEBUG("new_newsgroup(%p, %s)\n", *newsgroup, name);
+
+    if(*newsgroup == NULL) {
+        *newsgroup = malloc(sizeof(newsgroup_t));
+        if(!*newsgroup) {
             ERROR("unable to allocate memory for newsgroup_t root.\n");
             return;
         }
-        newsgroup->name = copy_string(name);
-        newsgroup->next = NULL;
-        return;
+        (*newsgroup)->name = copy_string(name);
+        (*newsgroup)->next = NULL;
     }
-    new_newsgroup(name, newsgroup->next);
+    else {
+        new_newsgroup(&((*newsgroup)->next), name);
+    }
 }
 
 void free_newsgroup(newsgroup_t *newsgroup)
@@ -73,6 +76,16 @@ bool search_newsgroup(newsgroup_t *newsgroup, char *name)
     }
 }
 
+void print_newsgroup(newsgroup_t *newsgroup)
+{
+    if(!newsgroup) {
+        return;
+    }
+
+    printf("%s ", newsgroup->name);
+    print_newsgroup(newsgroup->next);
+}
+
 newsgroup_t *parse_xref(char *xref)
 {
     newsgroup_t *newsgroup = NULL;
@@ -82,13 +95,13 @@ newsgroup_t *parse_xref(char *xref)
     token = xref + 7; /* first token after "Xref: " */
 
     /* split by whitespace */
-    for(p = token; p < end; p++) {
-        if(*p == ' '){
+    for(p = token; p <= end; p++) {
+        if(*p == ' ' || p == end){
             *p = '\0';
             // token = the word without whitespace:
             if((colon = strchr(token, ':'))) {
                 *colon = '\0';
-                new_newsgroup(token, newsgroup);
+                new_newsgroup(&newsgroup, token);
             }
             token = p+1;
         }

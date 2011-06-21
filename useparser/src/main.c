@@ -36,10 +36,6 @@ int main(int argc, const char* argv[])
      * read line-by-line */
     char *plain = NULL, *line = NULL;
     size_t plain_size=0;
-    /* parsing */
-    char *newsgroup, *hash_data, *hash = NULL;
-    overview_t overview;
-    uint16_t num, total;
 
     /* to measure the speed of reading the file */
     uint64_t time_start, count_chunks=0;
@@ -52,23 +48,14 @@ int main(int argc, const char* argv[])
     setenv("TZ", "UTC", 1);
     tzset();
 
-    /* md5 test 
-    gen_md5((unsigned char*)argv[1], strlen(argv[1]), &hash);
-    for(i=0;i<16;i++){
-        printf("%02x",hash[i]);
-    }
-    printf("\n");
-    exit(0);
-    */
-
-    if(argc != 3) {
+    if(argc != 2) {
         ERROR("you need to specify the <FILE> parameter\n\n" \
-                "Usage: %s <FILE> <NEWSGROUP>\n\nFILE can be a filename or - " \
+                "Usage: %s <FILE>\n\nFILE can be a filename or - " \
                 "to read from standard input instead.\n", argv[0]);
         return -1;
     }
     fname = argv[1];
-    newsgroup = copy_string((char*)argv[2]);
+
     if((fd = fopen(fname, "r")) == NULL) {
         ERROR("unable to open '%s' (errno:%d)!\n", fname, errno);
         return -1;
@@ -84,6 +71,8 @@ int main(int argc, const char* argv[])
 
     /* sigint (C-c) aborts file read */
     signal(SIGINT, sigint_handler);
+
+    parser_startup();
 
     time_start = mstime();
     while(feof(fd) == 0 && !abort_fread) {
@@ -166,30 +155,8 @@ int main(int argc, const char* argv[])
                 if(plain[i] == '\r' && plain[i+1] == '\n') {
                     plain[i] = '\0';
 
-                    /* process the newsgroup article header line */
-                    overview = parse_overview(line);
-                    if(parse_subject(overview.subject, &num, &total)) {
-                        hash_data = join_string(overview.subject, overview.from);
-                        md5(hash_data, strlen(hash_data), &hash);
-                        FREE(hash_data);
-
-                        /* for(int j=0;j<16;j++){
-                        printf("%02x",hash[j]); }
-                        printf("\n"); */
-
-                        // check memory cache for present binary_t
-                        // this really parses the strings in the overview_t structure.
-                        binary_t *binary = new_binary(overview, num, total, newsgroup);
-                        if(!binary) {
-                            ERROR("error creating new binary?! (subject:%s)\n", overview.subject);
-                            continue;
-                        }
-                        
-                        free_binary(binary);
-                    }
-                    else {
-                        printf("invalid: %s\n", overview.subject);
-                    }
+                    /* parse line and store new/updated multipart binary */
+                    parser_process(line);
 
                     /* proceed with next line */
                     if(i+2 < plain_size) {
@@ -215,8 +182,8 @@ int main(int argc, const char* argv[])
     }
     printf("\n");
 
-    FREE(hash);
-    FREE(newsgroup);
+    parser_shutdown();
+
     FREE(fbuffer);
 
     fclose(fd);

@@ -33,11 +33,13 @@ struct newsgroup_s {
 };
 typedef struct newsgroup_s newsgroup_t;
 /* append name of newsgroup to newsgroup list */
-void new_newsgroup(char *name, newsgroup_t *newsgroup);
+void new_newsgroup(newsgroup_t **newsgroup, char *name);
 /* free memory recursivly of newsgroup linked list */
 void free_newsgroup(newsgroup_t *newsgroup);
 /* search newsgroup linked list */
 bool search_newsgroup(newsgroup_t *newsgroup, char *name);
+/* print list of newsgroups to stdout (debugging) */
+void print_newsgroup(newsgroup_t *newsgroup);
 
 /* parse xref header for newsgroups, search for something like: 
  * / ([a-zA-Z0-9\.]+):[0-9]+/g */

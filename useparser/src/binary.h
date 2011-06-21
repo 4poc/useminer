@@ -33,7 +33,7 @@ typedef struct {
 } binary_t;
 /* allocate new binary, parse overview information (subject must already
  * been parsed, copies memory of all strings */
-binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *newsgroup);
+binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total);
 /* free memory of binary container */
 void free_binary(binary_t *binary);
 

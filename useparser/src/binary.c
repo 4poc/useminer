@@ -1,6 +1,6 @@
 #include "binary.h"
 
-binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *newsgroup)
+binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
 {
     binary_t *binary;
 
@@ -16,13 +16,15 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
     /* parse date */
     binary->date = parse_date(overview.date);
 
-    /* parse xref for other newsgroups, and append */
+    /* parse xref for newsgroups, and append, I think that
+     * the group where the xzver data comes from is included in xref,
+     * not really sure through */
     binary->newsgroups = NULL;
     if(overview.xref) {
         binary->newsgroups = parse_xref(overview.xref);
     }
-    if(!search_newsgroup(binary->newsgroups, newsgroup)) {
-        new_newsgroup(newsgroup, binary->newsgroups);
+    else {
+        ERROR("overview struct missing xref!\n");
     }
 
     binary->parts_total = total;

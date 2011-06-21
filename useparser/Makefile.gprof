@@ -1,4 +1,4 @@
-# CC=clang
+ # CC=clang
 # CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L 
 
 # gcc:
@@ -9,29 +9,29 @@ CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L
 all: useparser
 
 useparser: main.o yenc.o zlib.o overview.o binary.o md5.o common.o
-	$(CC) main.o yenc.o zlib.o overview.o binary.o md5.o common.o -lz -o useparser
+	$(CC) main.o yenc.o zlib.o overview.o binary.o md5.o common.o -lz -o useparser -pg
 
 main.o:
-	$(CC) $(CFLAGS) src/main.c
+	$(CC) $(CFLAGS) src/main.c -pg
 
 yenc.o:
-	$(CC) $(CFLAGS) src/yenc.c
+	$(CC) $(CFLAGS) src/yenc.c -pg
 
 zlib.o:
-	$(CC) $(CFLAGS) src/zlib.c
+	$(CC) $(CFLAGS) src/zlib.c -pg
 
 overview.o:
-	$(CC) $(CFLAGS) src/overview.c
+	$(CC) $(CFLAGS) src/overview.c -pg
 
 binary.o:
-	$(CC) $(CFLAGS) src/binary.c
+	$(CC) $(CFLAGS) src/binary.c -pg
 
 md5.o:
-	$(CC) $(CFLAGS) src/md5.c
+	$(CC) $(CFLAGS) src/md5.c -pg
 
 common.o:
-	$(CC) $(CFLAGS) src/common.c
+	$(CC) $(CFLAGS) src/common.c -pg
 
 clean:
 	@rm -rf useparser *.o
-
+ 

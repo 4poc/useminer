@@ -46,10 +46,6 @@ static int32_t yenc_crc_table[256] = {
 0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 
 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
-static void yenc_crc_update(int32_t *crc, char c)
-{
-    *crc = yenc_crc_table[(*crc^(c&0x000000ffL))&0xffL]^((*crc>>8L)&0xffffffL);
-}
 #endif /* YENC_CHECK_CRC */
 
 size_t yenc_decode(char *encoded, char **p_decoded)
@@ -119,7 +115,7 @@ size_t yenc_decode(char *encoded, char **p_decoded)
         decoded[decoded_size] = c;
         decoded_size++;
 #ifdef YENC_CHECK_CRC
-        yenc_crc_update(&crc, c);
+        crc = yenc_crc_table[(crc^(c&0x000000ffL))&0xffL]^((crc>>8L)&0xffffffL);
 #endif
     }
 

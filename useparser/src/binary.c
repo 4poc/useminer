@@ -17,6 +17,7 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
     binary->date = parse_date(overview.date);
 
     /* parse xref for other newsgroups, and append */
+    binary->newsgroups = NULL;
     if(overview.xref) {
         binary->newsgroups = parse_xref(overview.xref);
     }
@@ -27,7 +28,6 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total, char *ne
     binary->parts_total = total;
     /* allocate for all parts */
     binary->parts = malloc(sizeof(binary_part_t*) * total);
-    //DEBUG("memory allocation for ->parts, %d\n", total * sizeof(binary_part_t*));
     if(!binary->parts) {
         ERROR("unable to allocate memory for binary_t.parts");
         return NULL;
@@ -53,7 +53,9 @@ void free_binary(binary_t *binary)
     free_newsgroup(binary->newsgroups);
 
     for(int i=0; i<binary->parts_total;i++){
-        free_binary_part(binary->parts[i]);
+        if(binary->parts[i]) {
+            free_binary_part(binary->parts[i]);
+        }
     }
     FREE(binary->parts);
 

@@ -12,6 +12,7 @@
 #include "zlib.h"
 #include "overview.h"
 #include "binary.h"
+#include "parser.h"
 
 static bool abort_fread = false; 
 

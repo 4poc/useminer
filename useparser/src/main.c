@@ -13,6 +13,7 @@
 #include "overview.h"
 #include "binary.h"
 #include "parser.h"
+#include "config.h"
 
 static bool abort_fread = false; 
 
@@ -45,6 +46,7 @@ int main(int argc, const char* argv[])
     INFO("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
     INFO(" ---------------------------------- \n");
 
+
     /* work with UTC/GMT everywhere */
     setenv("TZ", "UTC", 1);
     tzset();
@@ -72,6 +74,12 @@ int main(int argc, const char* argv[])
 
     /* sigint (C-c) aborts file read */
     signal(SIGINT, sigint_handler);
+
+    if(!config_load("useparser.cfg")) {
+        ERROR("unable to load config file!\n");
+        return -1;
+    }
+    //DEBUG("Test: >%s<\n", config_string("storage_disk_path"));
 
     parser_startup();
 
@@ -188,6 +196,8 @@ int main(int argc, const char* argv[])
     FREE(fbuffer);
 
     fclose(fd);
+
+    config_unload();
 
     return 0;
 }

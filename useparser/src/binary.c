@@ -36,11 +36,24 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
     }
     memset(binary->parts, 0, sizeof(binary_part_t*) * total);
     if(num > 1 && num <= total) { /* this would be an invalid article otherwise */
-        binary->parts[num-1] = new_binary_part(overview.message_id, atoi(overview.bytes));
+        binary->parts[num-1] = new_binary_part(
+                overview.message_id, atoi(overview.bytes));
     }
     /* else { free binary; return NULL; } */
 
     return binary;
+}
+
+void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
+{
+    if(binary->parts[num-1] != NULL) {
+        ERROR("binary part number already there!, skipping. (%s (%d))\n",
+                overview.subject, num);
+        return;
+    }
+
+    binary->parts[num-1] = new_binary_part(
+            overview.message_id, atoi(overview.bytes));
 }
 
 void free_binary(binary_t *binary)

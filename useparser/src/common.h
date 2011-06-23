@@ -62,6 +62,11 @@ char *slice_string(char **string, const char *begin, const char *end);
 char *copy_string(char *str);
 /* join two strings into newly allocated memory */
 char *join_string(char *s1, char *s2);
+/* move str pointer after beginning whitespace and nullbyte terminate
+ * last whitespace(s) */
+char *trim_string(char *str);
+/* allocate new memory and copy for integer */
+int *copy_integer(int integer);
 
 #endif /* _COMMON_H */
 

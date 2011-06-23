@@ -34,6 +34,7 @@ typedef struct {
 /* allocate new binary, parse overview information (subject must already
  * been parsed, copies memory of all strings */
 binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total);
+void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num);
 /* free memory of binary container */
 void free_binary(binary_t *binary);
 

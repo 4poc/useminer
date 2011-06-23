@@ -98,3 +98,22 @@ char *join_string(char *s1, char *s2)
     return joined;
 }
 
+char *trim_string(char *str)
+{
+    char *end;
+    for(str=str; *str==' '; str++);
+    while((end = strrchr(str, ' '))) {
+        *end = '\0';
+    }
+
+    return str;
+}
+
+int *copy_integer(int integer)
+{
+    int *p;
+    p = malloc(sizeof(int));
+    *p = integer;
+    return p;
+}
+

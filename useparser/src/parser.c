@@ -30,16 +30,11 @@ void parser_process(char *line)
     md5(hash_data, strlen(hash_data), &hash);
     FREE(hash_data);
 
-    if(!parse_subject(overview.subject, &num, &total)) {
-        ERROR("article isn't multipart binary? (subject:%s)\n", 
-                overview.subject);
-        return;
-    }
-
-    /* if(binary = storage_search(hash) != NULL) {
-     * ...
-     * }
-     * else { */ /* this part is the first of this binary */
+    // if(binary = storage_search(hash) != NULL) {
+        /* binary found in storage, add new binary part */
+    //     insert_binary_part(binary, overview, num);
+    // }
+    // else { */ /* this part is the first of this binary */
 
         /* create new binary */
         binary = new_binary(overview, num, total);
@@ -47,7 +42,7 @@ void parser_process(char *line)
             ERROR("error creating new binary?! (subject:%s)\n", overview.subject);
             return;
         }
-        /* storage_new(binary); */
+        // storage_new(binary);
 
     /* } */
 

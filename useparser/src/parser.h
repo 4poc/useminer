@@ -5,6 +5,8 @@
 #include "binary.h"
 #include "overview.h"
 
+#include "storage.h"
+
 void parser_startup();
 void parser_process(char *line);
 void parser_shutdown();

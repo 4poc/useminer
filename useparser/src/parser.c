@@ -8,6 +8,8 @@ void parser_startup()
 {
     DEBUG("parser startup\n");
     hash = NULL;
+
+    storage_init();
 }
 
 void parser_process(char *line)
@@ -42,7 +44,7 @@ void parser_process(char *line)
             ERROR("error creating new binary?! (subject:%s)\n", overview.subject);
             return;
         }
-        // storage_new(binary);
+        storage_new(hash, binary);
 
     /* } */
 
@@ -59,5 +61,7 @@ void parser_shutdown()
 {
     DEBUG("parser shutdown\n");
     FREE(hash);
+
+    storage_init();
 }
 

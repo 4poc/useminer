@@ -13,7 +13,7 @@ typedef union {
     int *integer;
 } config_value_t;
 
-/* linear list with configuration pairs (key/value) */
+/* linked list with configuration pairs (key/value) */
 struct config_pair {
     char *key;
     config_value_t *value;

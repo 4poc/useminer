@@ -75,11 +75,14 @@ int main(int argc, const char* argv[])
     /* sigint (C-c) aborts file read */
     signal(SIGINT, sigint_handler);
 
+    /* configuration TODO: config file via argument */
     if(!config_load("useparser.cfg")) {
         ERROR("unable to load config file!\n");
         return -1;
     }
     //DEBUG("Test: >%s<\n", config_string("storage_disk_path"));
+    
+
 
     parser_startup();
 

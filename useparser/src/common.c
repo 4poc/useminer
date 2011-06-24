@@ -32,8 +32,9 @@ void md5(char *data, size_t data_size, char **hash)
     MD5_CTX context;
 
     if(!*hash) {
-        *hash = malloc(16 * sizeof(char));
+        *hash = malloc(16 * sizeof(char)); //  + 1);
         DEBUG("allocate memory for md5 at %p\n", *hash);
+        // *hash[16] = '\0';
     }
     if(!*hash) {
         ERROR("unable to allocate memory for gen_md5()\n");

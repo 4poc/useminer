@@ -44,28 +44,31 @@ void parser_process(char *line)
     md5(hash_data, strlen(hash_data), &hash);
     FREE(hash_data);
 
-    // if(binary = storage_search(hash) != NULL) {
+    uint32_t index = hashtable_index(hash);
+    DEBUG("search for index [%d] subject: %s\n", index, overview.subject);
+    if((binary = storage_search(index, hash))) {
         /* binary found in storage, add new binary part */
-    //     insert_binary_part(binary, overview, num);
-    // }
-    // else { */ /* this part is the first of this binary */
-
+        DEBUG("existing binary found [%p]\n", binary);
+        insert_binary_part(binary, overview, num);
+    }
+    else { /* this part is the first of this binary */
         /* create new binary */
         binary = new_binary(overview, num, total);
         if(!binary) {
             ERROR("error creating new binary?! (subject:%s)\n", overview.subject);
             return;
         }
-        storage_new(hash, binary);
+        DEBUG("new binary created [%p]\n", binary);
+        storage_new(index, hash, binary);
+    }
 
-    /* } */
-
-    //if(complete_binary(binary)) { /* all parts of binary completed */
+    if(complete_binary(binary)) { /* all parts of binary completed */
         /* append tupel for this binary to postgres binary COPY file */
         /* remove from storage */
-        //storage_remove(hash);
-    //}
+        // storage_remove(hash);
+        DEBUG("\n\nbinary completed!\n\n");
+    }
 
-    free_binary(binary);
+    /* free_binary(binary); TODO: gc */
 }
 

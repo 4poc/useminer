@@ -4,6 +4,8 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
 {
     binary_t *binary;
 
+    //DEBUG("new binary num/total: %d/%d\n", num, total);
+
     binary = malloc(sizeof(binary_t));
     if(!binary) {
         ERROR("unable to allocate memory for binary_t");
@@ -27,6 +29,7 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
         ERROR("overview struct missing xref!\n");
     }
 
+    binary->parts_completed = 1;
     binary->parts_total = total;
     /* allocate for all parts */
     binary->parts = malloc(sizeof(binary_part_t*) * total);
@@ -34,8 +37,10 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
         ERROR("unable to allocate memory for binary_t.parts");
         return NULL;
     }
+    DEBUG("binary->parts[%d] allocated %p\n",
+           sizeof(binary_part_t*) * total, binary->parts);
     memset(binary->parts, 0, sizeof(binary_part_t*) * total);
-    if(num > 1 && num <= total) { /* this would be an invalid article otherwise */
+    if(num >= 1 && num <= total) { /* this would be an invalid article otherwise */
         binary->parts[num-1] = new_binary_part(
                 overview.message_id, atoi(overview.bytes));
     }
@@ -46,6 +51,8 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
 
 void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
 {
+    //DEBUG("insert binary at %p %d/%d\n", binary, num, binary->parts_total);
+    //DEBUG("binary->parts at %p\n", binary->parts)
     if(binary->parts[num-1] != NULL) {
         ERROR("binary part number already there!, skipping. (%s (%d))\n",
                 overview.subject, num);
@@ -54,6 +61,7 @@ void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
 
     binary->parts[num-1] = new_binary_part(
             overview.message_id, atoi(overview.bytes));
+    binary->parts_completed++;
 }
 
 void free_binary(binary_t *binary)
@@ -97,5 +105,10 @@ void free_binary_part(binary_part_t *part)
     }
     FREE(part->message_id);
     FREE(part);
+}
+
+bool complete_binary(binary_t *binary)
+{
+    return binary->parts_completed == binary->parts_total;
 }
 

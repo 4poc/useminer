@@ -8,16 +8,6 @@ int test_rows = 0;
 
 bool storage_init()
 {
-    /*
-    INFO("initialize storage (memory storage: %d binaries/%d bytes)\n",
-            *config_integer("storage_memory"), 
-            *config_integer("storage_memory") * sizeof(binary_t));
-    storage_mem = malloc(*config_integer("storage_memory") * sizeof(binary_t));
-    if(!storage_mem) {
-        ERROR("unable to allocate memory storage!\n");
-    }
-    */
-
     size_t hashtable_size = *config_integer("storage_memory_hashtable") *
        sizeof(hashtable_row_t *); 
 
@@ -38,23 +28,12 @@ void storage_uninit()
     FREE(hashtable);
 }
 
-void storage_new(char *hash, binary_t *binary)
+void storage_new(uint16_t index, char *hash, binary_t *binary)
 {
-    uint32_t index = hashtable_index(hash);
-    if(!hashtable_search(index, hash)) {
-        DEBUG("store new: %s\n", binary->subject);
-        hashtable_new(&hashtable[index], hash, binary);
-        DEBUG("test rows: %d collisions: %d\n", test_rows, test_collisions);
-    }
-    else {
-//        DEBUG("skip existing: %s\n", binary->subject);
-    }
-
-
-    // storage_mem[storage_used++] = binary;
-    //
-    //    md5print(hash);
-    //    printf("(reduced hash: %d)\n\n", hashtable_index(hash));
+    // DEBUG("store new: %s\n", binary->subject);
+    hashtable_new(&hashtable[index], hash, binary);
+    DEBUG("load factor: %.02f\n", 
+            test_rows / (float)*config_integer("storage_memory_hashtable"));
 }
 
 uint32_t hashtable_index(char *hash)
@@ -105,6 +84,14 @@ hashtable_row_t *hashtable_search(uint32_t index, char *hash)
 {
     hashtable_row_t *row = hashtable[index];
 
+    if(!row) {
+        return NULL;
+    }
+
+    if(!row->next) { /* no need to compare hashes (one row) */
+        return row;
+    }
+
     while(row) {
         if(memcmp(row->hash, hash, 16) == 0) {
             return row;
@@ -114,5 +101,17 @@ hashtable_row_t *hashtable_search(uint32_t index, char *hash)
     }
 
     return NULL;
+}
+
+binary_t *storage_search(uint16_t index, char *hash)
+{
+    hashtable_row_t *row;
+    row = hashtable_search(index, hash);
+    if(!row) {
+        return NULL;
+    }
+    else {
+        return row->binary;
+    }
 }
 

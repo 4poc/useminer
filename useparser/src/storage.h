@@ -37,7 +37,8 @@ hashtable_row_t *hashtable_search(uint32_t index, char *hash);
 bool storage_init();
 void storage_uninit();
 
-void storage_new(char *hash, binary_t *binary);
+void storage_new(uint16_t index, char *hash, binary_t *binary);
+binary_t *storage_search(uint16_t index, char *hash);
 
 
 #endif /* _STORAGE_H */

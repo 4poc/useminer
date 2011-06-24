@@ -29,6 +29,7 @@ typedef struct {
     newsgroup_t *newsgroups;
 
     uint16_t parts_total; /* parsed from the (num/total) of the subject */
+    uint16_t parts_completed;
     binary_part_t **parts; /* array of pointers to part_t structs */
 } binary_t;
 /* allocate new binary, parse overview information (subject must already
@@ -37,6 +38,7 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total);
 void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num);
 /* free memory of binary container */
 void free_binary(binary_t *binary);
+bool complete_binary(binary_t *binary);
 
 #endif /* _BINARY_H */
 

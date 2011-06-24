@@ -7,9 +7,10 @@
 
 #include "storage.h"
 
-void parser_startup();
+bool parser_init();
+void parser_uninit();
+
 void parser_process(char *line);
-void parser_shutdown();
 
 #endif /* _PARSER_H */
 

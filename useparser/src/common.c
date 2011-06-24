@@ -46,6 +46,15 @@ void md5(char *data, size_t data_size, char **hash)
     MD5_Final((unsigned char*)(*hash), &context);
 }
 
+void md5print(char *hash)
+{
+    int i;
+    for(i = 0; i < 16; i++) {
+        printf("%02x", (unsigned char)hash[i]);
+    }
+    printf("\n");
+}
+
 char *slice_string(char **string, const char *begin, const char *end)
 {
     char *pbegin = NULL, *pend = NULL;

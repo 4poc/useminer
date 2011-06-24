@@ -82,9 +82,10 @@ int main(int argc, const char* argv[])
     }
     //DEBUG("Test: >%s<\n", config_string("storage_disk_path"));
     
-
-
-    parser_startup();
+    if(!parser_init()) {
+        ERROR("unable to initialize parser!\n");
+        return -1;
+    }
 
     time_start = mstime();
     while(feof(fd) == 0 && !abort_fread) {
@@ -135,6 +136,9 @@ int main(int argc, const char* argv[])
                 est_min = est_sec / 60;
                 est_sec -= est_min * 60;
             }
+#ifdef ENABLE_DEBUG
+            printf("\n");
+#endif
             printf("\x1b[1Kdecode xover message.. " \
                    "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min])\r",
                     (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0),
@@ -142,6 +146,9 @@ int main(int argc, const char* argv[])
                     ((mstime()-time_start)/1000.0),
                     est_min,
                     est_sec);
+#ifdef ENABLE_DEBUG
+            printf("\n");
+#endif
 
             /* decode yEnc encoded data */
             yenc_decode_size = yenc_decode(fbuffer, &yenc_decode_buffer);
@@ -178,7 +185,7 @@ int main(int argc, const char* argv[])
             } /* end line by line parsing */
             DEBUG("read %d lines from message chunk\n", i);
             FREE(plain);
-            //exit(0);
+            exit(0);
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
                 /* do nothing (unlikely) */
@@ -194,7 +201,7 @@ int main(int argc, const char* argv[])
     }
     printf("\n");
 
-    parser_shutdown();
+    parser_uninit();
 
     FREE(fbuffer);
 

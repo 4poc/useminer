@@ -4,12 +4,24 @@ char *hash_data, *hash=NULL;
 overview_t overview;
 uint16_t num, total;
 
-void parser_startup()
+bool parser_init()
 {
     DEBUG("parser startup\n");
     hash = NULL;
 
-    storage_init();
+    if(!storage_init()) {
+        return false;
+    }
+
+    return true;
+}
+
+void parser_uninit()
+{
+    DEBUG("parser shutdown\n");
+    FREE(hash);
+
+    storage_uninit();
 }
 
 void parser_process(char *line)
@@ -55,13 +67,5 @@ void parser_process(char *line)
     //}
 
     free_binary(binary);
-}
-
-void parser_shutdown()
-{
-    DEBUG("parser shutdown\n");
-    FREE(hash);
-
-    storage_init();
 }
 

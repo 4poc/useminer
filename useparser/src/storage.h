@@ -15,21 +15,26 @@
  * of binary_t structures.
  * hashing is done by modulo reduction of the hash itself,
  * collisions within the hashtable are resolved by seperate chaining */
-struct hashtable_node {
+struct hashtable_row {
     char hash[16];
     binary_t *binary;
-    struct hashtable_node *next; /* only used if calculated hash collides */
+    struct hashtable_row *next; /* only used if calculated hash collides */
 };
-typedef struct hashtable_node hashtable_node_t;
+typedef struct hashtable_row hashtable_row_t;
 
-hashtable_node_t *hashtable;
+hashtable_row_t **hashtable;
 
 /* calculate the modulo reduction of hash, using the hashtable size.
  * this method is using the gmp arbitary precision library to calculate
  * the modulo remainder of the 128bit "integer" md5 */ 
-uint32_t hashtable_reduce(char *hash);
+uint32_t hashtable_index(char *hash);
 
-void storage_init();
+
+void hashtable_new(hashtable_row_t **row, char *hash, binary_t *binary);
+hashtable_row_t *hashtable_search(uint32_t index, char *hash);
+
+
+bool storage_init();
 void storage_uninit();
 
 void storage_new(char *hash, binary_t *binary);

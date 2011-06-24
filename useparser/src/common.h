@@ -51,6 +51,7 @@ uint64_t fdsize(FILE* fd);
 uint64_t mstime();
 /* generate md5 hash for data */
 void md5(char *data, size_t data_size, char **hash);
+void md5print(char *hash);
 
 /* slice partial string between begin and end,
  * Returns pointer to the first occurence of begin.

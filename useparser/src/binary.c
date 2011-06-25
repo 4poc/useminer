@@ -4,6 +4,11 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
 {
     binary_t *binary;
 
+    if(num > total) {
+        ERROR("num > total! subj: %s\n", overview.subject);
+        exit(0);
+    }
+
     //DEBUG("new binary num/total: %d/%d\n", num, total);
 
     binary = malloc(sizeof(binary_t));
@@ -51,8 +56,17 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
 
 void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
 {
+    if(num > binary->parts_total) {
+        ERROR("error try to insert part num > total!\n");
+        ERROR("overview.subject: %s\n", overview.subject);
+        ERROR("binary->subject: %s\n", binary->subject);
+        exit(0);
+    }
+
+
     //DEBUG("insert binary at %p %d/%d\n", binary, num, binary->parts_total);
     //DEBUG("binary->parts at %p\n", binary->parts)
+    DEBUG("parts[%d]/total:%d\n", num-1, binary->parts_total);
     if(binary->parts[num-1] != NULL) {
         /* the part specified by num is already set. I'm unsure about how
          * to handle this case, most indexer seem to let newer parts
@@ -62,14 +76,13 @@ void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
          * is already completed and written away?
          * 
          * So for now I let new parts overwrite the old ones... */
-        DEBUG("binary part number already there, overwrite (%s (%d))\n",
-                overview.subject, num);
+        DEBUG("binary part number already there, overwrite (%s)\n",
+                overview.subject);
         free_binary_part(binary->parts[num-1]);
     }
 
-    DEBUG("parts[%d]/total:%d\n", num-1, binary->parts_total);
-    binary->parts[num-1] = new_binary_part(
-            overview.message_id, atoi(overview.bytes));
+ new_binary_part( overview.message_id, atoi(overview.bytes)); 
+ //   binary->parts[num-1] = 
     binary->parts_completed++;
 }
 
@@ -96,6 +109,7 @@ void free_binary(binary_t *binary)
 
 binary_part_t *new_binary_part(char *message_id, uint32_t bytes)
 {
+    DEBUG("new_binary_part(%s, %d);\n", message_id, bytes);
     binary_part_t *binary_part;
     binary_part = malloc(sizeof(binary_part_t));
     if(!binary_part) {
@@ -104,11 +118,13 @@ binary_part_t *new_binary_part(char *message_id, uint32_t bytes)
     }
     binary_part->message_id = copy_string(message_id);
     binary_part->bytes = bytes;
+    DEBUG("allocated binary_part: %p\n", binary_part);
     return binary_part;
 }
 
 void free_binary_part(binary_part_t *part)
 {
+    DEBUG("free_binary_part(%p);\n", part);
     if(!part || !(part->message_id)) {
         return;
     }

@@ -28,19 +28,19 @@
 #define ARRAY_LEN(a)    ( sizeof(a) / sizeof(a[0]) )
 
 #ifdef ENABLE_ERROR
-    #define ERROR(...)    fprintf(stdout, "[error] " __VA_ARGS__);
+    #define ERROR(...)    fprintf(stderr, "[error] " __VA_ARGS__)
 #else
     #define ERROR(...)
 #endif
 
 #ifdef ENABLE_DEBUG
-    #define DEBUG(...)    printf("[debug] " __VA_ARGS__);
+    #define DEBUG(...)    printf("[debug] " __VA_ARGS__)
 #else
     #define DEBUG(...)
 #endif
 
 #ifdef ENABLE_INFO
-    #define INFO(...)    printf("[info] " __VA_ARGS__);
+    #define INFO(...)    printf("[info] " __VA_ARGS__)
 #else
     #define INFO(...)
 #endif

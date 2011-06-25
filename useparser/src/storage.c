@@ -88,10 +88,6 @@ hashtable_row_t *hashtable_search(uint32_t index, char *hash)
         return NULL;
     }
 
-    if(!row->next) { /* no need to compare hashes (one row) */
-        return row;
-    }
-
     while(row) {
         if(memcmp(row->hash, hash, 16) == 0) {
             return row;

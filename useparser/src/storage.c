@@ -134,13 +134,18 @@ void storage_remove(uint16_t index, char *hash)
     hashtable_row_t *prev = row;
     row = row->next;
     while(row) {
+        DEBUG("while(row): %p\n", row);
         if(memcmp(row->hash, hash, 16) == 0) {
             /* detach list element */
             prev->next = row->next;
             FREE(row);
         }
+        if(!row) {
+            break;
+        }
         
         prev = row;
+        row = row->next;
     }
 }
 

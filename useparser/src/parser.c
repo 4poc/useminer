@@ -26,10 +26,6 @@ void parser_process(char *line)
 {
     binary_t *binary;
 
-
-    DEBUG("\n");
-    DEBUG("%s\n", line);
-
     /* splice line into the headers of overview_t */
     overview = parse_overview(line);
     
@@ -38,6 +34,10 @@ void parser_process(char *line)
         ERROR("article subject not valid multipart binary? (subject:%s)",
                 overview.subject);
         return;
+    }
+
+    if(num > total) {
+        ERROR("article number > total segments\n");
     }
 
     /* calculate hash for subject and from headers,
@@ -67,7 +67,7 @@ void parser_process(char *line)
     if(complete_binary(binary)) { /* all parts of binary completed */
         /* append tupel for this binary to postgres binary COPY file */
         /* remove from storage */
-        // storage_remove(hash);
+        storage_remove(index, hash);
         DEBUG("\n\nbinary completed!\n\n");
     }
 

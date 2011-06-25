@@ -6,7 +6,6 @@ uint16_t num, total;
 
 bool parser_init()
 {
-    DEBUG("parser startup\n");
     hash = NULL;
 
     if(!storage_init()) {
@@ -18,7 +17,6 @@ bool parser_init()
 
 void parser_uninit()
 {
-    DEBUG("parser shutdown\n");
     FREE(hash);
 
     storage_uninit();
@@ -27,6 +25,10 @@ void parser_uninit()
 void parser_process(char *line)
 {
     binary_t *binary;
+
+
+    DEBUG("\n");
+    DEBUG("%s\n", line);
 
     /* splice line into the headers of overview_t */
     overview = parse_overview(line);
@@ -45,7 +47,7 @@ void parser_process(char *line)
     FREE(hash_data);
 
     uint32_t index = hashtable_index(hash);
-    DEBUG("search for index [%d] subject: %s\n", index, overview.subject);
+    DEBUG("search for index [%d] [%d/%d] \n", index, num, total);
     if((binary = storage_search(index, hash))) {
         /* binary found in storage, add new binary part */
         DEBUG("existing binary found [%p]\n", binary);

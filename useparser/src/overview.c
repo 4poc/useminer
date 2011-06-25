@@ -143,7 +143,7 @@ bool parse_subject(char *subject, uint16_t *num, uint16_t *total)
         *open = '\0';
     }
 
-    DEBUG("subject:%s, {%d/%d}\n", subject, *num, *total);
+    // DEBUG("subject:%s, {%d/%d}\n", subject, *num, *total);
 
     return true;
 }

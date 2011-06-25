@@ -37,8 +37,8 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
         ERROR("unable to allocate memory for binary_t.parts");
         return NULL;
     }
-    DEBUG("binary->parts[%d] allocated %p\n",
-           sizeof(binary_part_t*) * total, binary->parts);
+    //DEBUG("binary->parts[%d] allocated %p\n",
+    //       sizeof(binary_part_t*) * total, binary->parts);
     memset(binary->parts, 0, sizeof(binary_part_t*) * total);
     if(num >= 1 && num <= total) { /* this would be an invalid article otherwise */
         binary->parts[num-1] = new_binary_part(
@@ -54,11 +54,20 @@ void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
     //DEBUG("insert binary at %p %d/%d\n", binary, num, binary->parts_total);
     //DEBUG("binary->parts at %p\n", binary->parts)
     if(binary->parts[num-1] != NULL) {
-        ERROR("binary part number already there!, skipping. (%s (%d))\n",
+        /* the part specified by num is already set. I'm unsure about how
+         * to handle this case, most indexer seem to let newer parts
+         * overwrite the old ones.
+         * I'm not really sure why this is happening, the message_id is 
+         * different in most cases but not the contents? What if the binary 
+         * is already completed and written away?
+         * 
+         * So for now I let new parts overwrite the old ones... */
+        DEBUG("binary part number already there, overwrite (%s (%d))\n",
                 overview.subject, num);
-        return;
+        free_binary_part(binary->parts[num-1]);
     }
 
+    DEBUG("parts[%d]/total:%d\n", num-1, binary->parts_total);
     binary->parts[num-1] = new_binary_part(
             overview.message_id, atoi(overview.bytes));
     binary->parts_completed++;
@@ -88,7 +97,7 @@ void free_binary(binary_t *binary)
 binary_part_t *new_binary_part(char *message_id, uint32_t bytes)
 {
     binary_part_t *binary_part;
-    binary_part = malloc(sizeof(binary_part));
+    binary_part = malloc(sizeof(binary_part_t));
     if(!binary_part) {
         ERROR("unable to allocate memory for binary_part_t");
         return NULL;
@@ -100,7 +109,7 @@ binary_part_t *new_binary_part(char *message_id, uint32_t bytes)
 
 void free_binary_part(binary_part_t *part)
 {
-    if(!part) {
+    if(!part || !(part->message_id)) {
         return;
     }
     FREE(part->message_id);

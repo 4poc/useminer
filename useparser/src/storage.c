@@ -115,3 +115,56 @@ binary_t *storage_search(uint16_t index, char *hash)
     }
 }
 
+void storage_remove(uint16_t index, char *hash)
+{     
+    hashtable_row_t *row = hashtable[index];
+
+    if(!row) {
+        return;
+    }
+
+    if(!(row->next)) {
+        FREE(row);
+        hashtable[index] = NULL;
+        return;
+    }
+
+    if(memcmp(row->hash, hash, 16) == 0) {
+        hashtable[index] = row->next;
+        FREE(row);
+        return;
+    }
+
+    hashtable_row_t *prev = row;
+    row = row->next;
+    while(row) {
+        if(memcmp(row->hash, hash, 16) == 0) {
+            /* detach list element */
+            prev->next = row->next;
+            FREE(row);
+        }
+        
+        prev = row;
+    }
+}
+
+void hashtable_print() 
+{
+    int i, j, tab = 0;
+    hashtable_row_t *row;
+    for(i = 0; i < *config_integer("storage_memory_hashtable"); i++) {
+        row = hashtable[i];
+        printf("[%d] ", i);
+        while(row) {
+            /* for(j=0; j<tab;j++) {
+                printf("\t");
+            } */ 
+            printf("<%p> ", row->binary);
+            row = row->next;
+            tab++;
+        }
+        tab =0;
+        printf("\n");
+    }
+}
+

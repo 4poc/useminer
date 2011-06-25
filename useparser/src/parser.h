@@ -12,5 +12,6 @@ void parser_uninit();
 
 void parser_process(char *line);
 
+
 #endif /* _PARSER_H */
 

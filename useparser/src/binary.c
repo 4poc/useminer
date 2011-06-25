@@ -81,8 +81,8 @@ void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
         free_binary_part(binary->parts[num-1]);
     }
 
- new_binary_part( overview.message_id, atoi(overview.bytes)); 
- //   binary->parts[num-1] = 
+    binary->parts[num-1] = 
+        new_binary_part( overview.message_id, atoi(overview.bytes)); 
     binary->parts_completed++;
 }
 

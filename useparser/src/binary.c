@@ -6,7 +6,7 @@ binary_t *new_binary(overview_t overview, uint16_t num, uint16_t total)
 
     if(num > total) {
         ERROR("num > total! subj: %s\n", overview.subject);
-        exit(0);
+        return NULL;
     }
 
     //DEBUG("new binary num/total: %d/%d\n", num, total);
@@ -60,7 +60,7 @@ void insert_binary_part(binary_t *binary, overview_t overview, uint16_t num)
         ERROR("error try to insert part num > total!\n");
         ERROR("overview.subject: %s\n", overview.subject);
         ERROR("binary->subject: %s\n", binary->subject);
-        exit(0);
+        return;
     }
 
 

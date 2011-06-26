@@ -34,7 +34,6 @@ size_t zlib_inflate(char *in_buffer, size_t in_size, char **p_out_buffer)
         ret = inflate(&strm, Z_NO_FLUSH);
         switch (ret) {
             case Z_NEED_DICT:
-                ret = Z_DATA_ERROR;     /* and fall through */
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 (void)inflateEnd(&strm);

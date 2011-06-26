@@ -16,6 +16,11 @@ overview_t parse_overview(char *line)
         line = p;
     }
 
+    if(p != 9) {
+        ERROR("unexpected header count from overview db\n");
+        // return; oehm was?
+    }
+
     /* the order and presence of each field should be queried from the server
      * via show/list/view overview.fmt */
     overview.article_num = parts[0];

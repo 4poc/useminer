@@ -136,19 +136,21 @@ int main(int argc, const char* argv[])
                 est_min = est_sec / 60;
                 est_sec -= est_min * 60;
             }
-#ifdef ENABLE_DEBUG
+//#ifdef ENABLE_DEBUG
             printf("\n");
-#endif
+//#endif
             printf("\x1b[1Kdecode xover message.. " \
-                   "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min])\r",
+                   "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min]) HT:%d (completed:%d)\r",
                     (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0),
                     (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0) / 
                     ((mstime()-time_start)/1000.0),
                     est_min,
-                    est_sec);
-#ifdef ENABLE_DEBUG
+                    est_sec,
+                    hashtable_count(),
+                    get_completed_binary());
+//#ifdef ENABLE_DEBUG
             printf("\n");
-#endif
+//#endif
 
             /* decode yEnc encoded data */
             yenc_decode_size = yenc_decode(fbuffer, &yenc_decode_buffer);

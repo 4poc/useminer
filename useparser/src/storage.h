@@ -44,5 +44,7 @@ binary_t *storage_search(uint16_t index, char *hash);
 void storage_remove(uint16_t index, char *hash);
 void hashtable_print(); 
 
+int hashtable_count();
+
 #endif /* _STORAGE_H */
 

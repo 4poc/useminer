@@ -169,3 +169,17 @@ void hashtable_print()
     }
 }
 
+int hashtable_count()
+{
+    int i, count = 0;
+    hashtable_row_t *row;
+    for(i = 0; i < *config_integer("storage_memory_hashtable"); i++) {
+        row = hashtable[i];
+        while(row) {
+            count++;
+            row = row->next;
+        }
+    }
+    return count;
+}
+

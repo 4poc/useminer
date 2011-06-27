@@ -3,6 +3,11 @@
 char *hash_data, *hash=NULL;
 overview_t overview;
 uint16_t num, total;
+int completed_binary = 0;
+int get_completed_binary()
+{
+    return completed_binary; 
+}
 
 bool parser_init()
 {
@@ -69,6 +74,7 @@ void parser_process(char *line)
         /* remove from storage */
         storage_remove(index, hash);
         DEBUG("\n\nbinary completed!\n\n");
+        completed_binary++;
     }
 
     /* free_binary(binary); TODO: gc */

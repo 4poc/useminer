@@ -13,7 +13,7 @@ void parser_uninit();
 
 void parser_process(char *line);
 
-int get_completed_binary();
+int parser_complete_count();
 
 
 #endif /* _PARSER_H */

@@ -3,11 +3,7 @@
 char *hash_data, *hash=NULL;
 overview_t overview;
 uint16_t num, total;
-int completed_binary = 0;
-int get_completed_binary()
-{
-    return completed_binary; 
-}
+int complete_count = 0;
 
 bool parser_init()
 {
@@ -73,10 +69,16 @@ void parser_process(char *line)
         /* append tupel for this binary to postgres binary COPY file */
         /* remove from storage */
         storage_remove(index, hash);
+        free_binary(binary);
         DEBUG("\n\nbinary completed!\n\n");
-        completed_binary++;
+        complete_count++;
     }
 
     /* free_binary(binary); TODO: gc */
+}
+
+int parser_complete_count()
+{
+    return complete_count;
 }
 

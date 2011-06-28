@@ -147,7 +147,7 @@ int main(int argc, const char* argv[])
                     est_min,
                     est_sec,
                     hashtable_count(),
-                    get_completed_binary());
+                    parser_complete_count());
 //#ifdef ENABLE_DEBUG
             printf("\n");
 //#endif

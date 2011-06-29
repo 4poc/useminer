@@ -15,6 +15,14 @@
 #include "parser.h"
 #include "config.h"
 
+/* overview, raw information within the overview database of the usenet server
+ * file, a single file made of N segments
+ * segment, yEnc encoded binary segment (a.k.a. part) of a single file,
+ *          equals to a single usenet message/article.
+ *
+ * cache, stores incompleted files in memory and on disk
+ */
+
 static bool abort_fread = false; 
 
 void sigint_handler(int dummy);
@@ -136,9 +144,9 @@ int main(int argc, const char* argv[])
                 est_min = est_sec / 60;
                 est_sec -= est_min * 60;
             }
-//#ifdef ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
             printf("\n");
-//#endif
+#endif
             printf("\x1b[1Kdecode xover message.. " \
                    "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min]) HT:%d (completed:%d)\r",
                     (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0),
@@ -148,9 +156,9 @@ int main(int argc, const char* argv[])
                     est_sec,
                     hashtable_count(),
                     parser_complete_count());
-//#ifdef ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
             printf("\n");
-//#endif
+#endif
 
             /* decode yEnc encoded data */
             yenc_decode_size = yenc_decode(fbuffer, &yenc_decode_buffer);

@@ -8,11 +8,14 @@ CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L -g
 
 all: useparser
 
-useparser: main.o yenc.o zlib.o storage.o parser.o config.o overview.o binary.o md5.o common.o
-	$(CC) main.o yenc.o zlib.o storage.o parser.o config.o overview.o binary.o md5.o common.o -lz -lgmp -o useparser
+useparser: main.o cache.o yenc.o zlib.o storage.o parser.o config.o overview.o binary.o md5.o common.o
+	$(CC) main.o cache.o yenc.o zlib.o storage.o parser.o config.o overview.o binary.o md5.o common.o -lz -lgmp -o useparser
 
 main.o:
 	$(CC) $(CFLAGS) src/main.c
+
+cache.o:
+	$(CC) $(CFLAGS) src/cache.c
 
 yenc.o:
 	$(CC) $(CFLAGS) src/yenc.c

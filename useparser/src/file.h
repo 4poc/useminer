@@ -13,7 +13,7 @@
 struct s_newsgroup {
     char *name;
     struct s_newsgroup *next;
-}
+};
 /* append newsgroup to the end of newsgroups-list, copies name */
 void newsgroup_insert(
         struct s_newsgroup **newsgroup_list,
@@ -40,7 +40,7 @@ struct s_file {
     char *subject;
     char *from;
     uint64_t date;
-    s_newsgroup *newsgroups;
+    struct s_newsgroup *newsgroups;
 
     uint16_t total;
     uint16_t completed;
@@ -51,7 +51,7 @@ struct s_file *file_new(
         char *subject, 
         char *from, 
         uint64_t date, 
-        s_newsgroup *newsgroups, 
+        struct s_newsgroup *newsgroups, 
         uint16_t total);
 /* free memory of file, including newsgroup and segments lists */
 void file_free(struct s_file *file);

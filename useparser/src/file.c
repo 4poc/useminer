@@ -9,7 +9,7 @@ void newsgroup_insert(
     }
 
     /* create new newsgroup */
-    *newsgroup_list = malloc(sizeof(s_newsgroup));
+    *newsgroup_list = malloc(sizeof(struct s_newsgroup));
     if(!*newsgroup_list) {
         ERROR("unable to allocate memory for s_newsgroup\n");
         return;
@@ -29,7 +29,107 @@ void newsgroup_free(struct s_newsgroup *newsgroup_list)
     }
 }
 
-bool newsgroup_search(struct s_newsgroup *newsgroups, char *name)
+bool newsgroup_search(struct s_newsgroup *newsgroup_list, char *name)
 {
+    while(newsgroup_list) {
+        if(strcmp(newsgroup_list->name, name) == 0) {
+            return true;
+        }
+        newsgroup_list = newsgroup_list->next;
+    }
+    return false;
+}
+
+struct s_segment *segment_new(char *message_id, int bytes)
+{
+    struct s_segment *segment;
+    segment = malloc(sizeof(struct s_segment));
+    if(!segment) {
+        ERROR("unable to allocate memory file segment");
+        return NULL;
+    }
+    segment->message_id = copy_string(message_id);
+    segment->bytes = bytes;
+    return segment;
+}
+
+void segment_free(struct s_segment *segment)
+{
+    if(segment && segment->message_id) {
+        FREE(segment->message_id);
+        FREE(segment);
+    }
+}
+
+struct s_file *file_new(
+        char *subject, 
+        char *from, 
+        uint64_t date, 
+        struct s_newsgroup *newsgroups, 
+        uint16_t total)
+{
+    struct s_file *file;
+    file = malloc(sizeof(struct s_file));
+    if(!file) {
+        ERROR("unable to allocate memory for file");
+        return NULL;
+    }
+
+    file->subject = copy_string(subject);
+    file->from = copy_string(from);
+    file->date = date;
+    file->newsgroups = newsgroups;
+
+    file->completed = 0;
+    file->total = total;
+    /* allocate for all segments */
+    file->segments = malloc(sizeof(struct s_segment *) * total);
+    if(!file->segments) {
+        ERROR("unable to allocate memory for file segments");
+        return NULL;
+    }
+    memset(file->segments, 0, sizeof(struct s_segment *) * total);
+
+    return file;
+}
+
+void file_free(struct s_file *file)
+{
+    if(!file) {
+        return;
+    }
+
+    FREE(file->subject);
+    FREE(file->from);
+
+    newsgroup_free(file->newsgroups);
+
+    for(int i = 0; i < file->total; i++) {
+        if(file->segments[i]) {
+            segment_free(file->segments[i]);
+        }
+    }
+    FREE(file->segments);
+    FREE(file);
+}
+
+void file_insert_segment(
+        struct s_file *file, 
+        uint16_t num, 
+        struct s_segment *segment)
+{
+    if(num > file->total) {
+        ERROR("invalid file segment, number > total!\n");
+        ERROR("subject: %s\n", file->subject);
+        return;
+    }
+
+    if(file->segments[num-1]) {
+        DEBUG("warning: overwrite file segment (subject: %s)\n", file->subject);
+        segment_free(file->segments[num-1]);
+    }
+
+    file->segments[num-1] = segment;
+    file->completed++;
 }
 

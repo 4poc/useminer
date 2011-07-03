@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS=-W -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L
+CFLAGS=-Wall -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L
 LDFLAGS=-lz -lgmp
-SRC_FILES=main.c binary.c common.c config.c md5.c overview.c parser.c storage.c yenc.c zlib.c 
+SRC_FILES=main.c common.c config.c parse.c file.c cache.c md5.c yenc.c zlib.c 
 DIR=./src
 SRC=$(addprefix $(DIR)/,$(SRC_FILES))
 OBJ=$(SRC:.c=.o)
@@ -9,7 +9,8 @@ OBJ=$(SRC:.c=.o)
 all: useparser
 clang: CC=clang
 clang: useparser
-debug: CFLAGS+=-DDEBUG -g
+#debug: CFLAGS+=-DENABLE_DEBUG -g
+debug: CFLAGS+=-g
 debug: useparser
 
 useparser: $(OBJ)

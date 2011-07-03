@@ -1,16 +1,17 @@
-#ifndef _OVERVIEW_H
-#define _OVERVIEW_H
-
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <time.h>
+#ifndef _PARSE_H
+#define _PARSE_H
 
 #include "common.h"
 
+#include "file.h"
+#include "cache.h"
+
+bool parse_init();
+void parse_uninit();
+void parse_process(char *line);
+
 /* raw pointers to overview headers, points to the same memory area */
-typedef struct {
+struct s_overview {
     char *p; /* start of line */
     char *article_num;
     /* article header parts */
@@ -22,34 +23,20 @@ typedef struct {
     char *bytes;        /* Bytes: */
     char *lines;        /* Lines: */
     char *xref;         /* Xref:full */
-} overview_t; 
+}; 
+static struct s_overview *overview;
 /* parse line into overview struct, FIXME: dynamic order (OVERVIEW.FMT) */
-overview_t parse_overview(char *line);
-
-/* linear linked list of newsgroups */
-struct newsgroup_s {
-    char *name;
-    struct newsgroup_s *next; 
-};
-typedef struct newsgroup_s newsgroup_t;
-/* append name of newsgroup to newsgroup list */
-void new_newsgroup(newsgroup_t **newsgroup, char *name);
-/* free memory recursivly of newsgroup linked list */
-void free_newsgroup(newsgroup_t *newsgroup);
-/* search newsgroup linked list */
-bool search_newsgroup(newsgroup_t *newsgroup, char *name);
-/* print list of newsgroups to stdout (debugging) */
-void print_newsgroup(newsgroup_t *newsgroup);
-
-/* parse xref header for newsgroups, search for something like: 
- * / ([a-zA-Z0-9\.]+):[0-9]+/g */
-newsgroup_t *parse_xref(char *xref);
+bool parse_overview(char *line);
 
 /* parse subject line of a multipart binary for number and total.
  * search for something like: /[ ]?\((\d+)\/(\d+)\)$/
  * example subject: Stuff - [13/123] - "stuff.part013.rar" yEnc (12/31)
  * (num = 12, total 31) */
-bool parse_subject(char *subject, uint16_t *num, uint16_t *total);
+bool parse_header_subject(char *subject, uint16_t *num, uint16_t *total);
+
+/* parse xref header for newsgroups, search for something like: 
+ * / ([a-zA-Z0-9\.]+):[0-9]+/g */
+struct s_newsgroup *parse_header_xref(char *xref);
 
 /* usenet date format mess, took some of the date formats from here: 
  * http://kitenet.net/~joey/blog/entry/date_formats_of_a_decade_of_usenet/ */
@@ -123,7 +110,7 @@ static const struct {
     { "IDLE", +12, 0, },    /* International Date Line East */
 };
 /* convert date header string to unix timestamp (UTC) */
-uint64_t parse_date(char *date);
+uint64_t parse_header_date(char *date);
 
-#endif /* _OVERVIEW_H */
-
+#endif /* _PARSE_H */
+ 

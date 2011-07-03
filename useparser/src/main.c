@@ -8,12 +8,10 @@
 #include <time.h>
 
 #include "common.h"
+#include "config.h"
 #include "yenc.h"
 #include "zlib.h"
-#include "overview.h"
-#include "binary.h"
-#include "parser.h"
-#include "config.h"
+#include "parse.h"
 
 /* overview, raw information within the overview database of the usenet server
  * file, a single file made of N segments
@@ -36,7 +34,8 @@ int main(int argc, const char* argv[])
     FILE *fd = NULL;
     char fchunk[FILE_CHUNK_SIZE];
     char *fbuffer = NULL, *fbuffer_realloc = NULL;
-    size_t tmp=0, fsize=0, fbuffer_total=0, fbuffer_used=0; 
+    size_t tmp=0, fbuffer_total=0, fbuffer_used=0; 
+    uint64_t fsize = 0; 
 
     /* multiline xzver responses are yEnc encoded, for decoding: */
     char *end_of_message = NULL, *yenc_decode_buffer = NULL;
@@ -90,7 +89,7 @@ int main(int argc, const char* argv[])
     }
     //DEBUG("Test: >%s<\n", config_string("storage_disk_path"));
     
-    if(!parser_init()) {
+    if(!parse_init()) {
         ERROR("unable to initialize parser!\n");
         return -1;
     }
@@ -148,14 +147,12 @@ int main(int argc, const char* argv[])
             printf("\n");
 #endif
             printf("\x1b[1Kdecode xover message.. " \
-                   "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min]) HT:%d (completed:%d)\r",
+                   "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min]) HT:d (completed:d)\r",
                     (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0),
                     (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0) / 
                     ((mstime()-time_start)/1000.0),
                     est_min,
-                    est_sec,
-                    hashtable_count(),
-                    parser_complete_count());
+                    est_sec);
 #ifdef ENABLE_DEBUG
             printf("\n");
 #endif
@@ -185,7 +182,7 @@ int main(int argc, const char* argv[])
                     plain[i] = '\0';
 
                     /* parse line and store new/updated multipart binary */
-                    parser_process(line);
+                    parse_process(line);
 
                     /* proceed with next line */
                     if(i+2 < plain_size) {
@@ -210,7 +207,7 @@ int main(int argc, const char* argv[])
     }
     printf("\n");
 
-    parser_uninit();
+    parse_uninit();
 
     FREE(fbuffer);
 

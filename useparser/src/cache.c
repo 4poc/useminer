@@ -19,13 +19,14 @@ bool cache_table_init()
 
 void cache_table_free()
 {
-    struct s_cache_slot *slot;
-    for(int i = 0; i = *config_integer("cache_table_size"); i++) {
-        slot = cache_table[i];
-        while(slot) {
+    struct s_cache_slot *slot, *next_slot;
+    for(int i = 0; i < *config_integer("cache_table_size"); i++) {
+        next_slot = cache_table[i];
+        while(next_slot) {
+            slot = next_slot;
+            next_slot = slot->next;
             FREE(slot->file);
             FREE(slot);
-            slot = slot->next;
         }
     }
     FREE(cache_table);
@@ -58,7 +59,7 @@ void cache_table_insert(int index, char *hash, struct s_file *file)
 {
     /* create a new slot */
     struct s_cache_slot *slot;
-    slot = malloc(sizeof(s_cache_slot));
+    slot = malloc(sizeof(struct s_cache_slot));
     if(!slot) {
         ERROR("error allocating memory for cache slot!\n");
         return;
@@ -98,7 +99,7 @@ void cache_table_remove(int index, char *hash)
         return;
     }
 
-    s_cache_slot *prev_slot = slot;
+    struct s_cache_slot *prev_slot = slot;
     slot = slot->next; /* we've already searched this slot */
     while(slot) {
         if(memcmp(slot->hash, hash, 16) == 0) {
@@ -115,7 +116,7 @@ void cache_table_remove(int index, char *hash)
 
 struct s_file *cache_table_search(int index, char *hash)
 {
-    s_cache_slot *slot = cache_table[index];
+    struct s_cache_slot *slot = cache_table[index];
 
     while(slot) {
         if(memcmp(slot->hash, hash, 16) == 0) {

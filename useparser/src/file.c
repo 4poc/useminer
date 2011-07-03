@@ -21,6 +21,7 @@ void newsgroup_insert(
 void newsgroup_free(struct s_newsgroup *newsgroup_list)
 {
     struct s_newsgroup *newsgroup;
+    DEBUG("free newsgroup list\n");
     while(newsgroup_list) {
         newsgroup = newsgroup_list;
         newsgroup_list = newsgroup_list->next;
@@ -55,6 +56,7 @@ struct s_segment *segment_new(char *message_id, int bytes)
 
 void segment_free(struct s_segment *segment)
 {
+    DEBUG("free segment\n");
     if(segment && segment->message_id) {
         FREE(segment->message_id);
         FREE(segment);
@@ -98,7 +100,7 @@ struct s_file *file_new(
 
 void file_free(struct s_file *file)
 {
-    DEBUG("[file] free file object memory [%p]\n", file);
+    DEBUG("free file object memory [%p]\n", file);
     if(!file) {
         return;
     }
@@ -113,7 +115,9 @@ void file_free(struct s_file *file)
             segment_free(file->segments[i]);
         }
     }
+    DEBUG("free file segment array\n");
     FREE(file->segments);
+    DEBUG("free file itself\n");
     FREE(file);
 }
 

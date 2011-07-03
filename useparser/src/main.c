@@ -144,8 +144,10 @@ int main(int argc, const char* argv[])
             }
 
             printf("------------------------------------------------\n");
-            printf("\x1b[2KRead:   %s (%s/s)\n", 
-                    hsize(stat_read).str, hsize(stat_read/stat_delta_time).str);
+            printf("\x1b[2KRead:   %s/%s (%s/s)\n", 
+                    hsize(stat_read).str,
+                    hsize(fsize).str, 
+                    hsize(stat_read/stat_delta_time).str);
 
             printf("\x1b[2K        %s allocated message memory\n", hsize(fbuffer_total).str); 
             printf("------------------------------------------------\n");
@@ -162,16 +164,11 @@ int main(int argc, const char* argv[])
             printf("\x1b[2K        %d segments (garbage: %d)\n",
                     parse_stat_segments,
                     parse_stat_lines - parse_stat_segments);
-            printf("\x1b[9F");
-/*
-------------------------------------------------
-Parse:  123 message chunks
-        14142/312 complete/incomplete files
-        4123141 segments
-------------------------------------------------
-Cache:  13983 cache table slots
-        31 collisions
-*/
+            printf("------------------------------------------------\n");
+            printf("\x1b[2KCache:  %d/%d cache table slots\n",
+                    cache_stat_slots,
+                    *config_integer("cache_table_size"));
+            printf("\x1b[11F");
 #endif
 
             /* decode yEnc encoded data */

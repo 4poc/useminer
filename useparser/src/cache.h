@@ -26,6 +26,8 @@ struct s_cache_slot {
 /* global memory table, initialized by cache_table_init() */
 static struct s_cache_slot **cache_table;
 
+int cache_stat_slots;
+ 
 /* allocate memory cache hashtable */
 bool cache_table_init();
 /* free cache_table and including file ptrs */

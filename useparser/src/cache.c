@@ -14,6 +14,8 @@ bool cache_table_init()
     }
     memset(cache_table, 0, table_size);
 
+    cache_stat_slots = 0;
+
     return true;
 }
 
@@ -62,6 +64,8 @@ void cache_table_insert(int index, char *hash, struct s_file *file)
 {
     DEBUG("cache memory insert file [#%d]\n", index);
 
+    cache_stat_slots++;
+
     /* create a new slot */
     struct s_cache_slot *slot;
     slot = malloc(sizeof(struct s_cache_slot));
@@ -87,10 +91,14 @@ void cache_table_remove(int index, char *hash)
 {
     struct s_cache_slot *slot = cache_table[index];
 
+    cache_stat_slots--;
+
+    DEBUG("cache table remove [#%d]\n", index);
+
     if(!slot) {
         return;
     }
-
+                                              
     if(!(slot->next)) { /* just the one slot in this table row */
         FREE(slot);
         cache_table[index] = NULL;
@@ -109,7 +117,6 @@ void cache_table_remove(int index, char *hash)
     while(slot) {
         if(memcmp(slot->hash, hash, 16) == 0) {
             prev_slot->next = slot->next; /* detach this slot */ 
-            FREE(slot->file);
             FREE(slot);
             break;
         }

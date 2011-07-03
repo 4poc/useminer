@@ -95,6 +95,8 @@ void parse_process(char *line)
     parse_stat_segments++;
 
     if(file->total == file->completed) {
+        file_free(file);
+        cache_table_remove(cache_index, hash);
         parse_stat_completed++;
         parse_stat_incomplete--;
     }

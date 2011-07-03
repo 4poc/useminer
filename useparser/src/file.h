@@ -16,12 +16,12 @@ struct s_newsgroup {
 }
 /* append newsgroup to the end of newsgroups-list, copies name */
 void newsgroup_insert(
-        struct s_newsgroup **newsgroups,
+        struct s_newsgroup **newsgroup_list,
         char *name);
 /* free memory of the newsgroups-list */
-void newsgroup_free(struct s_newsgroup *newsgroups);
+void newsgroup_free(struct s_newsgroup *newsgroup_list);
 /* search within newsgroups-list list for name */
-bool newsgroup_search(struct s_newsgroup *newsgroups, char *name);
+bool newsgroup_search(struct s_newsgroup *newsgroup_list, char *name);
 
 
 /* file segment (a single usenet article/message) */

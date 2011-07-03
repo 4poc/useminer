@@ -1,49 +1,23 @@
-# CC=clang
-# CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L 
-
-# gcc:
 CC=gcc
-CFLAGS=-c -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L -g
-# -g 	for debugging
-
+CFLAGS=-W -Wall -pedantic -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L
+LDFLAGS=-lz -lgmp
+SRC_FILES=main.c binary.c common.c config.c md5.c overview.c parser.c storage.c yenc.c zlib.c 
+DIR=./src
+SRC=$(addprefix $(DIR)/,$(SRC_FILES))
+OBJ=$(SRC:.c=.o)
+    
 all: useparser
+clang: CC=clang
+clang: useparser
+debug: CFLAGS+=-DDEBUG -g
+debug: useparser
 
-useparser: main.o cache.o yenc.o zlib.o storage.o parser.o config.o overview.o binary.o md5.o common.o
-	$(CC) main.o cache.o yenc.o zlib.o storage.o parser.o config.o overview.o binary.o md5.o common.o -lz -lgmp -o useparser
+useparser: $(OBJ)
+	$(CC) $(LDFLAGS) -o $@ $(OBJ)
 
-main.o:
-	$(CC) $(CFLAGS) src/main.c
-
-cache.o:
-	$(CC) $(CFLAGS) src/cache.c
-
-yenc.o:
-	$(CC) $(CFLAGS) src/yenc.c
-
-zlib.o:
-	$(CC) $(CFLAGS) src/zlib.c
-
-parser.o:
-	$(CC) $(CFLAGS) src/parser.c
-
-storage.o:
-	$(CC) $(CFLAGS) src/storage.c
-
-config.o:
-	$(CC) $(CFLAGS) src/config.c
-
-overview.o:
-	$(CC) $(CFLAGS) src/overview.c
-
-binary.o:
-	$(CC) $(CFLAGS) src/binary.c
-
-md5.o:
-	$(CC) $(CFLAGS) src/md5.c
-
-common.o:
-	$(CC) $(CFLAGS) src/common.c
+$(DIR)/%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	@rm -rf useparser *.o
+	@rm -rf useparser src/*.o
 

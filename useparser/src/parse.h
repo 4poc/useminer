@@ -10,6 +10,11 @@ bool parse_init();
 void parse_uninit();
 void parse_process(char *line);
 
+int parse_stat_completed;
+int parse_stat_incomplete;
+int parse_stat_lines;
+int parse_stat_segments;
+
 /* raw pointers to overview headers, points to the same memory area */
 struct s_overview {
     char *p; /* start of line */

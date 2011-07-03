@@ -47,12 +47,11 @@ int main(int argc, const char* argv[])
     size_t plain_size=0;
 
     /* to measure the speed of reading the file */
-    uint64_t time_start, count_chunks=0;
+    uint64_t time_start, stat_chunknum=0, stat_messages=0;
     uint16_t est_min, est_sec;
 
     INFO("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
     INFO(" ---------------------------------- \n");
-
 
     /* work with UTC/GMT everywhere */
     setenv("TZ", "UTC", 1);
@@ -76,8 +75,7 @@ int main(int argc, const char* argv[])
         ERROR("unable to determine filesize (errno:%d)!\n", errno);
         return -1;
     }
-    INFO("opened file %s (size: %zu B | %0.2f MiB)\n", 
-            fname, fsize, (fsize / 1024.0 / 1024.0));
+    INFO("opened file %s (size: %s)\n", fname, hsize(fsize).str);
 
     /* sigint (C-c) aborts file read */
     signal(SIGINT, sigint_handler);
@@ -94,14 +92,14 @@ int main(int argc, const char* argv[])
         return -1;
     }
 
-    time_start = mstime();
+    time_start = gettime();
     while(feof(fd) == 0 && !abort_fread) {
         if(fread(&fchunk, sizeof(char), FILE_CHUNK_SIZE, fd) != FILE_CHUNK_SIZE 
                 && ferror(fd) != 0) {
             ERROR("fread error occured\n");
             break;
         }
-        count_chunks++;
+        stat_chunknum++;
 
         /* grow buffer to store chunk */
         if(fbuffer == NULL) {
@@ -135,26 +133,45 @@ int main(int argc, const char* argv[])
         /* process/consume completed multiline messages in buffer */
         while((end_of_message = strstr(fbuffer, "\r\n.\r\n")) != NULL) {
             *end_of_message = '\0';
-            est_min = 0;
-            est_sec = (fsize - count_chunks * FILE_CHUNK_SIZE) / 
-                ((count_chunks * FILE_CHUNK_SIZE) /
-                 ((mstime()-time_start)/1000.0));
-            if(est_sec >= 60) {
-                est_min = est_sec / 60;
-                est_sec -= est_min * 60;
+
+            stat_messages++;
+
+#ifndef ENABLE_DEBUG
+            uint64_t stat_delta_time = gettime() - time_start,
+                     stat_read = stat_chunknum * FILE_CHUNK_SIZE;
+            if(stat_delta_time <= 0) {
+                stat_delta_time = 1;
             }
-#ifdef ENABLE_DEBUG
-            printf("\n");
-#endif
-            printf("\x1b[1Kdecode xover message.. " \
-                   "(T:%0.2f MiB | S:%0.2f MiB/s [%02d:%02d min]) HT:d (completed:d)\r",
-                    (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0),
-                    (count_chunks * FILE_CHUNK_SIZE / 1024.0 / 1024.0) / 
-                    ((mstime()-time_start)/1000.0),
-                    est_min,
-                    est_sec);
-#ifdef ENABLE_DEBUG
-            printf("\n");
+
+            printf("------------------------------------------------\n");
+            printf("\x1b[2KRead:   %s (%s/s)\n", 
+                    hsize(stat_read).str, hsize(stat_read/stat_delta_time).str);
+
+            printf("\x1b[2K        %s allocated message memory\n", hsize(fbuffer_total).str); 
+            printf("------------------------------------------------\n");
+            printf("\x1b[2KTime:   %s (ETA: %s)\n",
+                    formattime(stat_delta_time).str,
+                    formattime(
+                        (fsize - stat_read) / (stat_read/stat_delta_time)).str);
+            printf("------------------------------------------------\n");
+            printf("\x1b[2KParse:  %lld/~%d message chunks\n", 
+                    stat_messages, 
+                    (fsize / fbuffer_total));
+            printf("\x1b[2K        %d/%d complete/incomplete files\n",
+                    parse_stat_completed, parse_stat_incomplete);
+            printf("\x1b[2K        %d segments (garbage: %d)\n",
+                    parse_stat_segments,
+                    parse_stat_lines - parse_stat_segments);
+            printf("\x1b[9F");
+/*
+------------------------------------------------
+Parse:  123 message chunks
+        14142/312 complete/incomplete files
+        4123141 segments
+------------------------------------------------
+Cache:  13983 cache table slots
+        31 collisions
+*/
 #endif
 
             /* decode yEnc encoded data */
@@ -205,7 +222,11 @@ int main(int argc, const char* argv[])
             }
         }
     }
+#ifndef ENABLE_DEBUG
+    printf("\n\n\n\n\n");
+#else
     printf("\n");
+#endif
 
     parse_uninit();
 

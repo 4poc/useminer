@@ -20,11 +20,30 @@ uint64_t fdsize(FILE* fd)
     return size;
 }
 
-uint64_t mstime()
+uint64_t gettime()
 {
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    return (time.tv_sec * 1000) + (time.tv_usec / 1000.0 + 0.5);
+    return time(NULL);
+}
+
+struct s_format_time formattime(uint64_t time)
+{
+    struct s_format_time fmt;
+    uint8_t hour=0, min=0, sec=0;
+
+    if(time >= 60 * 60) { /* hour */
+        hour = time / (60 * 60);
+        time -= hour * (60 * 60);
+    }
+    if(time >= 60) {
+        min = time / 60;
+        time -= min * 60;
+    }
+    sec = time;
+
+
+    sprintf(&fmt.str, "%02d:%02d:%02d", hour, min, sec);
+
+    return fmt;
 }
 
 void md5(char *data, size_t data_size, char **hash)
@@ -46,13 +65,36 @@ void md5(char *data, size_t data_size, char **hash)
     MD5_Final((unsigned char*)(*hash), &context);
 }
 
-void md5print(char *hash)
+struct s_hex_md5 md5hex(char *hash)
 {
+    struct s_hex_md5 hex;
     int i;
+
     for(i = 0; i < 16; i++) {
-        printf("%02x", (unsigned char)hash[i]);
+        sprintf(hex.str + i*2, "%02x", (unsigned char)hash[i]);
     }
-    printf("\n");
+
+    return hex;
+}
+
+struct s_hsize hsize(uint64_t size)
+{
+    struct s_hsize hsize;
+
+    if(size >= 1024.0*1024*1024) {
+        sprintf(&hsize.str, "%0.3f GiB", (size / (1024.0*1024.0*1024.0)));
+    }
+    else if(size >= 1024*1024) {
+        sprintf(&hsize.str, "%0.3f MiB", (size / (1024.0*1024.0)));
+    }
+    else if(size >= 1024) {
+        sprintf(&hsize.str, "%0.3f KiB", (size / 1024.0));
+    }
+    else if(size < 1024) {
+        sprintf(&hsize.str, "%d");
+    }
+
+    return hsize;
 }
 
 char *slice_string(char **string, const char *begin, const char *end)

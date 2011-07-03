@@ -129,7 +129,7 @@ void file_insert_segment(
     }
 
     if(file->segments[num-1]) {
-        INFO("warning: overwrite file segment #%d/%d (subject: %s)\n", 
+        DEBUG("warning: overwrite file segment #%d/%d (subject: %s)\n", 
                 num, file->total, file->subject);
         segment_free(file->segments[num-1]);
     }

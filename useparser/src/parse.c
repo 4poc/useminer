@@ -15,6 +15,11 @@ bool parse_init()
         return false;
     }
 
+    parse_stat_completed = 0;
+    parse_stat_incomplete = 0;
+    parse_stat_lines = 0;
+    parse_stat_segments = 0;
+
     return true;
 }
 
@@ -33,6 +38,8 @@ void parse_process(char *line)
     struct s_file *file;
     uint16_t num, total;
     int cache_index;
+
+    parse_stat_lines++;
 
     /* splice line and write (global) static overview */
     parse_overview(line);
@@ -56,6 +63,7 @@ void parse_process(char *line)
     hash_data = join_string(overview->subject, overview->from);
     md5(hash_data, strlen(hash_data), &hash);
     FREE(hash_data);
+
 
     cache_index = cache_table_index(hash);
     if((file = cache_table_search(cache_index, hash))) {
@@ -81,6 +89,14 @@ void parse_process(char *line)
                     atoi(overview->bytes)));
         DEBUG("new file created [%p]\n", file);
         cache_table_insert(cache_index, hash, file);
+        parse_stat_incomplete++;
+    }
+
+    parse_stat_segments++;
+
+    if(file->total == file->completed) {
+        parse_stat_completed++;
+        parse_stat_incomplete--;
     }
 
     //exit(0);

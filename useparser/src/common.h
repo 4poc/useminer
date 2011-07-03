@@ -27,8 +27,7 @@
 
 #define ARRAY_LEN(a)    ( sizeof(a) / sizeof(a[0]) )
 
-#define LOG_MESSAGE(type, ...) \ 
-        do { \
+#define LOG_MESSAGE(type, ...) do { \
             printf("%s:%d: " type ": ", __FILE__, __LINE__); \
             printf( __VA_ARGS__); \
         } while(0)

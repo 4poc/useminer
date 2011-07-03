@@ -3,9 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <stdint.h>
+#include <inttypes.h> /* includes <stdint.h> */
 #include <string.h>
 
 #include "md5.h"

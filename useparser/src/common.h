@@ -27,20 +27,26 @@
 
 #define ARRAY_LEN(a)    ( sizeof(a) / sizeof(a[0]) )
 
+#define LOG_MESSAGE(type, ...) \ 
+        do { \
+            printf("%s:%d: " type ": ", __FILE__, __LINE__); \
+            printf( __VA_ARGS__); \
+        } while(0)
+
 #ifdef ENABLE_ERROR
-    #define ERROR(...)    fprintf(stderr, "[error] " __VA_ARGS__)
+    #define ERROR(...)      LOG_MESSAGE("error", __VA_ARGS__)
 #else
     #define ERROR(...)
 #endif
 
 #ifdef ENABLE_DEBUG
-    #define DEBUG(...)    printf("[debug] " __VA_ARGS__)
+    #define DEBUG(...)      LOG_MESSAGE("debug", __VA_ARGS__)
 #else
     #define DEBUG(...)
 #endif
 
 #ifdef ENABLE_INFO
-    #define INFO(...)    printf("[info] " __VA_ARGS__)
+    #define INFO(...)      LOG_MESSAGE("info", __VA_ARGS__)
 #else
     #define INFO(...)
 #endif

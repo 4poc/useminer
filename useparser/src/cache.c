@@ -5,7 +5,7 @@ bool cache_table_init()
     size_t table_size = *config_integer("cache_table_size") *
        sizeof(struct s_cache_slot *); 
 
-    INFO("allocate cache table (size: %d bytes)\n", table_size);
+    INFO("init memory cache (table size: %d bytes)\n", table_size);
 
     cache_table = malloc(table_size);
     if(!cache_table) {
@@ -19,6 +19,7 @@ bool cache_table_init()
 
 void cache_table_free()
 {
+    INFO("free cache memory\n");
     struct s_cache_slot *slot, *next_slot;
     for(int i = 0; i < *config_integer("cache_table_size"); i++) {
         next_slot = cache_table[i];
@@ -52,11 +53,15 @@ int cache_table_index(char *hash)
     mpz_clear(&mp_size);
     mpz_clear(&mp_result);
 
+    DEBUG("cache table index[%d]\n", result);
+
     return result;
 }
 
 void cache_table_insert(int index, char *hash, struct s_file *file)
 {
+    DEBUG("cache memory insert file [#%d]\n", index);
+
     /* create a new slot */
     struct s_cache_slot *slot;
     slot = malloc(sizeof(struct s_cache_slot));

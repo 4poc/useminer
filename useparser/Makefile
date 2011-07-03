@@ -9,8 +9,7 @@ OBJ=$(SRC:.c=.o)
 all: useparser
 clang: CC=clang
 clang: useparser
-#debug: CFLAGS+=-DENABLE_DEBUG -g
-debug: CFLAGS+=-g
+debug: CFLAGS+=-DENABLE_DEBUG -g
 debug: useparser
 
 useparser: $(OBJ)

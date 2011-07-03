@@ -69,6 +69,9 @@ struct s_file *file_new(
         uint16_t total)
 {
     struct s_file *file;
+
+    DEBUG("new file object\n");
+    
     file = malloc(sizeof(struct s_file));
     if(!file) {
         ERROR("unable to allocate memory for file");
@@ -95,6 +98,7 @@ struct s_file *file_new(
 
 void file_free(struct s_file *file)
 {
+    DEBUG("[file] free file object memory [%p]\n", file);
     if(!file) {
         return;
     }
@@ -118,14 +122,15 @@ void file_insert_segment(
         uint16_t num, 
         struct s_segment *segment)
 {
+    DEBUG("file insert segment #%d/%d\n", num, file->total);
     if(num > file->total) {
         ERROR("invalid file segment, number > total!\n");
-        ERROR("subject: %s\n", file->subject);
         return;
     }
 
     if(file->segments[num-1]) {
-        DEBUG("warning: overwrite file segment (subject: %s)\n", file->subject);
+        INFO("warning: overwrite file segment #%d/%d (subject: %s)\n", 
+                num, file->total, file->subject);
         segment_free(file->segments[num-1]);
     }
 

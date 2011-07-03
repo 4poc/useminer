@@ -4,6 +4,7 @@ static char *hash = NULL;
 
 bool parse_init()
 {
+    INFO("parse init\n");
     overview = malloc(sizeof(struct s_overview));
     if(!overview) {
         ERROR("unable to allocate overview\n");
@@ -19,6 +20,7 @@ bool parse_init()
 
 void parse_uninit()
 {
+    INFO("parse uninit\n");
     cache_table_free();
 
     FREE(hash);
@@ -47,6 +49,8 @@ void parse_process(char *line)
         return;
     }
 
+    DEBUG("process segment (#%d/%d) %s\n", num, total, overview->subject);
+
     /* calculate hash for subject and from headers,
      * (NOTE: subject is spliced from num and total by parse subject) */
     hash_data = join_string(overview->subject, overview->from);
@@ -54,11 +58,8 @@ void parse_process(char *line)
     FREE(hash_data);
 
     cache_index = cache_table_index(hash);
-    DEBUG("search for index [%d] [%d/%d] \n", cache_index, num, total);
     if((file = cache_table_search(cache_index, hash))) {
         /* file found in storage, add new segment */
-        DEBUG("existing file found [%p]\n", file);
-
         file_insert_segment(file, num, segment_new(
                     overview->message_id, 
                     atoi(overview->bytes)));

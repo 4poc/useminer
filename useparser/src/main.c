@@ -149,7 +149,8 @@ int main(int argc, const char* argv[])
                     hsize(fsize).str, 
                     hsize(stat_read/stat_delta_time).str);
 
-            printf("\x1b[2K        %s allocated message memory\n", hsize(fbuffer_total).str); 
+            printf("\x1b[2K        %s allocated message memory\n", 
+                    hsize(fbuffer_total).str); 
             printf("------------------------------------------------\n");
             printf("\x1b[2KTime:   %s (ETA: %s)\n",
                     formattime(stat_delta_time).str,

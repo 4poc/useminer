@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-Wall -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L
+CFLAGS=-Wall -O2 -std=c99 -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200112L
 LDFLAGS=-lz -lgmp
 SRC_FILES=main.c common.c config.c parse.c file.c cache.c md5.c yenc.c zlib.c 
 DIR=./src

@@ -13,8 +13,8 @@
 #include <gmp.h>
 
 #include "common.h"
-#include "file.h"
 #include "config.h"
+#include "file.h"
 
 /* simple hashtable implementation for incomplete memory cache */
 struct s_cache_slot {

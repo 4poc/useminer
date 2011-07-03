@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
 #include <signal.h>
@@ -156,7 +156,7 @@ int main(int argc, const char* argv[])
                     formattime(
                         (fsize - stat_read) / (stat_read/stat_delta_time)).str);
             printf("------------------------------------------------\n");
-            printf("\x1b[2KParse:  %lld/~%d message chunks\n", 
+            printf("\x1b[2KParse:  %lld/~%" PRIu64 " message chunks\n", 
                     stat_messages, 
                     (fsize / fbuffer_total));
             printf("\x1b[2K        %d/%d complete/incomplete files\n",

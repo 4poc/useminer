@@ -1,4 +1,3 @@
-
 #include "common.h"
 
 uint64_t fdsize(FILE* fd)
@@ -41,7 +40,7 @@ struct s_format_time formattime(uint64_t time)
     sec = time;
 
 
-    sprintf(&fmt.str, "%02d:%02d:%02d", hour, min, sec);
+    sprintf(fmt.str, "%02d:%02d:%02d", hour, min, sec);
 
     return fmt;
 }
@@ -82,16 +81,16 @@ struct s_hsize hsize(uint64_t size)
     struct s_hsize hsize;
 
     if(size >= 1024.0*1024*1024) {
-        sprintf(&hsize.str, "%0.3f GiB", (size / (1024.0*1024.0*1024.0)));
+        sprintf(hsize.str, "%0.3f GiB", (size / (1024.0*1024.0*1024.0)));
     }
     else if(size >= 1024*1024) {
-        sprintf(&hsize.str, "%0.3f MiB", (size / (1024.0*1024.0)));
+        sprintf(hsize.str, "%0.3f MiB", (size / (1024.0*1024.0)));
     }
     else if(size >= 1024) {
-        sprintf(&hsize.str, "%0.3f KiB", (size / 1024.0));
+        sprintf(hsize.str, "%0.3f KiB", (size / 1024.0));
     }
     else if(size < 1024) {
-        sprintf(&hsize.str, "%d");
+        sprintf(hsize.str, "%" PRIu64 " B", size);
     }
 
     return hsize;

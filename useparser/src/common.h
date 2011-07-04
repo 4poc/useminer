@@ -1,3 +1,19 @@
+/* useminer -- efficient usenet binary indexer
+ * Copyright (C) 2011 Matthias -apoc- Hecker <apoc@sixserv.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef _COMMON_H
 #define _COMMON_H
 
@@ -16,7 +32,7 @@
 #define ENABLE_ERROR
 // #define ENABLE_DEBUG
 #define ENABLE_INFO
-#define FILE_CHUNK_SIZE 1024 * 16   /* fread chunks */
+#define FILE_CHUNK_SIZE 1024 * 256  /* fread chunks */
 /* #define YENC_CHECK_SIZE             yenc decoding tests for correct size */
 #define YENC_CHECK_CRC              /* yenc decoding tests for correct CRC */
 

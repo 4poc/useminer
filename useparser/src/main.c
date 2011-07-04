@@ -1,3 +1,19 @@
+/* useminer -- efficient usenet binary indexer
+ * Copyright (C) 2011 Matthias -apoc- Hecker <apoc@sixserv.org>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdbool.h>
@@ -48,7 +64,6 @@ int main(int argc, const char* argv[])
 
     /* to measure the speed of reading the file */
     uint64_t time_start, stat_chunknum=0, stat_messages=0;
-    uint16_t est_min, est_sec;
 
     INFO("useparser v" VERSION " (" __DATE__ " " __TIME__ ")\n");
     INFO(" ---------------------------------- \n");
@@ -221,10 +236,9 @@ int main(int argc, const char* argv[])
         }
     }
 #ifndef ENABLE_DEBUG
-    printf("\n\n\n\n\n");
-#else
-    printf("\n");
+    printf("\x1b[12E");
 #endif
+    printf("\n\n");
 
     parse_uninit();
 
@@ -239,7 +253,7 @@ int main(int argc, const char* argv[])
 
 void sigint_handler(int dummy)
 {
-    printf("\n\n >sigint signal caught< \n\n");
+    DEBUG("sigint signal caught\n");
     abort_fread = true;
 }
 

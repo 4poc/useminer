@@ -92,6 +92,29 @@ struct s_hex_md5 md5hex(char *hash)
     return hex;
 }
 
+int md5mod(char *hash, int size)
+{
+    MP_INT mp_hash, mp_size, mp_result;
+    int result;
+
+    /* init gmp values */
+    mpz_init(&mp_hash);
+    mpz_import(&mp_hash, 16, 1, sizeof(char), 0, 0, hash);
+    mpz_init_set_ui(&mp_size, size);
+    mpz_init(&mp_result);
+
+    /* modulo reduction */
+    mpz_mod(&mp_result, &mp_hash, &mp_size);
+    result = mpz_get_ui(&mp_result);
+
+    /* free gmp values */
+    mpz_clear(&mp_hash);
+    mpz_clear(&mp_size);
+    mpz_clear(&mp_result);
+
+    return result;
+}
+
 struct s_hsize hsize(uint64_t size)
 {
     struct s_hsize hsize;

@@ -25,6 +25,9 @@
 #include <inttypes.h> /* includes <stdint.h> */
 #include <string.h>
 
+#include <gmp.h>
+
+
 #include "md5.h"
 
 #define VERSION         "0.0.1"
@@ -32,7 +35,9 @@
 #define ENABLE_ERROR
 // #define ENABLE_DEBUG
 #define ENABLE_INFO
-#define FILE_CHUNK_SIZE 1024 * 256  /* fread chunks */
+/* ideally the chunk size should be roughly the same as the 
+ * received message chunks (the range of articles of XZVER */
+#define FILE_CHUNK_SIZE 1024 * 1024 * 1  /* fread chunks */
 /* #define YENC_CHECK_SIZE             yenc decoding tests for correct size */
 #define YENC_CHECK_CRC              /* yenc decoding tests for correct CRC */
 
@@ -82,6 +87,8 @@ struct s_hex_md5 {
     char str[16 * 2 + 1];
 };
 struct s_hex_md5 md5hex(char *hash);
+
+int md5mod(char *hash, int size);
 
 struct s_hsize {
     char str[15];

@@ -30,6 +30,7 @@ int parse_stat_completed;
 int parse_stat_incomplete;
 int parse_stat_lines;
 int parse_stat_segments;
+int parse_stat_skip_completed;
 
 /* raw pointers to overview headers, points to the same memory area */
 struct s_overview {

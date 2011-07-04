@@ -174,9 +174,11 @@ int main(int argc, const char* argv[])
             printf("------------------------------------------------\n");
             printf("\x1b[2KParse:  %" PRIu64 "/~%" PRIu64 " message chunks\n", 
                     stat_messages, 
-                    (fsize / fbuffer_total));
+                    (fsize / fbuffer_used));
             printf("\x1b[2K        %d/%d complete/incomplete files\n",
                     parse_stat_completed, parse_stat_incomplete);
+            printf("\x1b[2K        %d skipped completed files\n",
+                    parse_stat_skip_completed);
             printf("\x1b[2K        %d segments (garbage: %d)\n",
                     parse_stat_segments,
                     parse_stat_lines - parse_stat_segments);
@@ -184,7 +186,7 @@ int main(int argc, const char* argv[])
             printf("\x1b[2KCache:  %d/%d cache table slots\n",
                     cache_stat_slots,
                     *config_integer("cache_table_size"));
-            printf("\x1b[11F");
+            printf("\x1b[12F");
 #endif
 
             /* decode yEnc encoded data */
@@ -236,7 +238,7 @@ int main(int argc, const char* argv[])
         }
     }
 #ifndef ENABLE_DEBUG
-    printf("\x1b[12E");
+    printf("\x1b[13E");
 #endif
     printf("\n\n");
 

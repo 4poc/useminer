@@ -53,27 +53,7 @@ void cache_table_free()
 
 int cache_table_index(char *hash)
 {
-    MP_INT mp_hash, mp_size, mp_result;
-    int result;
-
-    /* init gmp values */
-    mpz_init(&mp_hash);
-    mpz_import(&mp_hash, 16, 1, sizeof(char), 0, 0, hash);
-    mpz_init_set_ui(&mp_size, *config_integer("cache_table_size"));
-    mpz_init(&mp_result);
-
-    /* modulo reduction */
-    mpz_mod(&mp_result, &mp_hash, &mp_size);
-    result = mpz_get_ui(&mp_result);
-
-    /* free gmp values */
-    mpz_clear(&mp_hash);
-    mpz_clear(&mp_size);
-    mpz_clear(&mp_result);
-
-    DEBUG("cache table index[%d]\n", result);
-
-    return result;
+    return md5mod(hash, *config_integer("cache_table_size"));
 }
 
 void cache_table_insert(int index, char *hash, struct s_file *file)
@@ -154,5 +134,118 @@ struct s_file *cache_table_search(int index, char *hash)
     }
 
     return NULL;
+}
+
+bool complete_init()
+{
+    size_t table_size = *config_integer("complete_size") *
+       sizeof(struct s_complete_slot *); 
+
+    INFO("init memory for complete table (%s)\n", hsize(table_size).str);
+
+    complete_table = malloc(table_size);
+    if(!complete_table) {
+        ERROR("unable to allocate complete table!\n");
+        return false;
+    }
+    memset(complete_table, 0, table_size);
+
+    FILE *fd = fopen(config_string("complete_file"), "r");
+    if(fd) {
+        INFO("read complete table from file: %s (%s)\n",
+                config_string("complete_file"),
+                hsize(fdsize(fd)).str);
+
+        char hash[16];
+        int index;
+        while(feof(fd) == 0) {
+            if((fread(&hash, sizeof(char), 16, fd) != 16) && ferror(fd) != 0) {
+                ERROR("complete file corrupted?\n");
+                return false;
+            }
+            index = complete_index(hash);
+            if(complete_search(index, hash)) {
+                ERROR("duplicate hashes in complete file!\n");
+            }
+            else {
+                complete_insert(index, hash);
+            }
+        }
+
+        fclose(fd);
+    }                               
+
+    return true;
+}
+
+void complete_free()
+{
+    INFO("write complete table to: %s\n", config_string("complete_file"));
+
+    int written = 0;
+    struct s_complete_slot *slot, *next_slot;
+    FILE *fd = fopen(config_string("complete_file"), "w");
+    if(!fd) {
+        ERROR("unable to write to complete file.\n");
+        return;
+    }
+    for(int i = 0; i < *config_integer("complete_size"); i++) {
+        next_slot = complete_table[i];
+        while(next_slot) {
+            slot = next_slot;
+            next_slot = slot->next;
+
+            fwrite(slot->hash, 1, 16, fd);
+            written++;
+
+            FREE(slot);
+        }
+    }
+    fclose(fd);
+    FREE(complete_table);
+    INFO("written %d hashes to complete table file\n", written);
+}
+
+int complete_index(char *hash)
+{
+    return md5mod(hash, *config_integer("complete_size"));
+}
+
+bool complete_search(int index, char *hash)
+{
+    struct s_complete_slot *slot = complete_table[index];
+
+    while(slot) {
+        if(memcmp(slot->hash, hash, 16) == 0) {
+            return true;
+        }
+        slot = slot->next;
+    }
+
+    return false;
+}
+
+void complete_insert(int index, char *hash)
+{
+    DEBUG("complete table insert hash %s\n", md5hex(hash).str);
+
+    /* create a new slot */
+    struct s_complete_slot *slot;
+    slot = malloc(sizeof(struct s_complete_slot));
+    if(!slot) {
+        ERROR("error allocating memory for complete slot!\n");
+        return;
+    }
+
+    /* set slot hash */
+    memcpy(&(slot->hash), hash, 16);
+    slot->next = NULL;
+
+    /* append slot at the complete table row specified by index */
+    struct s_complete_slot **prev_slot = &(complete_table[index]);
+    while(*prev_slot) {
+        prev_slot = &((*prev_slot)->next);
+    }
+    *prev_slot = slot;
 }
 

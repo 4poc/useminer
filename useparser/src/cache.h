@@ -27,8 +27,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <gmp.h>
-
 #include "common.h"
 #include "config.h"
 #include "file.h"
@@ -60,6 +58,21 @@ void cache_table_insert(int index, char *hash, struct s_file *file);
 void cache_table_remove(int index, char *hash);
 /* search cached file entry within the cache table */
 struct s_file *cache_table_search(int index, char *hash);
+
+/* hashtable with md5 hashes for all completed files,
+ * stored on disk for persistance */
+struct s_complete_slot {
+    char hash[16];
+    struct s_complete_slot *next;
+};
+static struct s_complete_slot **complete_table;
+/* init table, read complete file */
+bool complete_init();
+/* free table memory, write to complete file */
+void complete_free();
+int complete_index(char *hash);
+bool complete_search(int index, char *hash);
+void complete_insert(int index, char *hash);
 
 #endif /* _CACHE_H */
 

@@ -31,10 +31,15 @@ bool parse_init()
         return false;
     }
 
+    if(!complete_init()) {
+        return false;
+    }
+
     parse_stat_completed = 0;
     parse_stat_incomplete = 0;
     parse_stat_lines = 0;
     parse_stat_segments = 0;
+    parse_stat_skip_completed = 0;
 
     return true;
 }
@@ -42,6 +47,7 @@ bool parse_init()
 void parse_uninit()
 {
     INFO("parse uninit\n");
+    complete_free();
     cache_table_free();
 
     FREE(hash);
@@ -53,7 +59,7 @@ void parse_process(char *line)
     static char *hash_data = NULL;
     struct s_file *file;
     uint16_t num, total;
-    int cache_index;
+    int cache_index, complete_idx;
 
     parse_stat_lines++;
 
@@ -80,6 +86,14 @@ void parse_process(char *line)
     md5(hash_data, strlen(hash_data), &hash);
     FREE(hash_data);
 
+    /* check hash with a list of already completed and "stored away"
+     * files, this list can become very large */
+    complete_idx = complete_index(hash);
+    if(complete_search(complete_idx, hash)) {
+        DEBUG("file hash found in complete table, skipping\n");
+        parse_stat_skip_completed++;
+        return;
+    }
 
     cache_index = cache_table_index(hash);
     if((file = cache_table_search(cache_index, hash))) {
@@ -111,6 +125,7 @@ void parse_process(char *line)
     parse_stat_segments++;
 
     if(file->total == file->completed) {
+        complete_insert(complete_idx, hash);
         file_free(file);
         cache_table_remove(cache_index, hash);
         parse_stat_completed++;

@@ -1,4 +1,4 @@
-    /* useminer -- efficient usenet binary indexer
+/* useminer -- efficient usenet binary indexer
  * Copyright (C) 2011 Matthias -apoc- Hecker <apoc@sixserv.org>
  *
  * This program is free software: you can redistribute it and/or modify

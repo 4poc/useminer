@@ -151,7 +151,7 @@ void cache_table_dump()
         return;
     }
 
-    int filename_size = path_size + (depth*2) + 3 + 1;
+    int filename_size = path_size + (depth*2) + 4 + 1;
     char *filename = malloc(filename_size);
     if(!filename) {
         ERROR("unable to allocate memory dump filenames!\n");
@@ -160,18 +160,66 @@ void cache_table_dump()
     /* filename: ./cache/####.ct */
     filename[filename_size-1] = '\0';
     strcpy(filename, path);
-    sprintf(filename+(filename_size-4), ".ct");
+    sprintf(filename+(filename_size-5), ".tpl");
 
     INFO("dumping %d cached file objects to disk!\n", cache_stat_slots);
     struct s_cache_slot *slot;
+    struct s_file *file;
+    struct s_newsgroup *newsgroup;
+    char *newsgroup_name;
+    struct s_segment *segment = NULL;
+    char *segment_message_id = NULL;
+    int segment_bytes, segment_index;
+
     for(int i = 0; i < *config_integer("cache_table_size"); i++) {
         slot = cache_table[i];
         while(slot) {
             // serialize to file: slot->file
+            file = slot->file;
+            newsgroup = file->newsgroups;
 
             DEBUG("dumping s_file to disk, with hash: %s\n", md5hex(slot->hash).str);
             strncpy(filename + path_size, md5hex(slot->hash).str, depth*2);
             DEBUG("dumping to filename: %s\n", filename);
+
+            tpl_node *tn;
+            tn = tpl_map("ssUvvA(s)A(isi)", 
+                    &file->subject,
+                    &file->from,
+                    &file->date,
+                    &file->total,
+                    &file->completed,
+                    &newsgroup_name,
+                    &segment_index, &segment_message_id, &segment_bytes);
+
+            if(!tn) {
+                ERROR("unable to create tpl map!\n");
+            }
+
+            DEBUG("Dump file struct...\n");
+            tpl_pack(tn, 0);
+
+            while(newsgroup) {
+                DEBUG("Dump newsgroup array element...\n");
+                newsgroup_name = newsgroup->name;
+                tpl_pack(tn, 1);
+                newsgroup = newsgroup->next;
+            }
+
+            for(int i = 0; i < file->total; i++) {
+                if(file->segments[i]) {
+                    DEBUG("dump file segment #%d\n", i);
+                    segment_index = i;
+                    segment_bytes = file->segments[i]->bytes;
+                    segment_message_id = file->segments[i]->message_id;
+                    tpl_pack(tn, 2);
+                }
+            }
+
+            tpl_dump(tn, TPL_FILE, filename);
+
+            tpl_free(tn);
+
 
             slot = slot->next;
         }

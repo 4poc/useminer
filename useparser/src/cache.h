@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <tpl.h>
+
 #include "common.h"
 #include "config.h"
 #include "file.h"

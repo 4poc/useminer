@@ -226,7 +226,7 @@ int main(int argc, const char* argv[])
             FREE(plain);
 
             /* exit(0); */
-            abort_fread = true;
+            abort_fread = true; /* NOTE: TESTING! */
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
                 /* do nothing (unlikely) */

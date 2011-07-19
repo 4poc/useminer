@@ -224,6 +224,9 @@ int main(int argc, const char* argv[])
             } /* end line by line parsing */
             DEBUG("read %d lines from message chunk\n", i);
             FREE(plain);
+
+            /* exit(0); */
+            abort_fread = true;
             
             if(fbuffer - (end_of_message+5) == fbuffer_used) {
                 /* do nothing (unlikely) */

@@ -48,6 +48,7 @@ void parse_uninit()
 {
     INFO("parse uninit\n");
     complete_free();
+    cache_table_dump();
     cache_table_free();
 
     FREE(hash);
@@ -125,14 +126,13 @@ void parse_process(char *line)
     parse_stat_segments++;
 
     if(file->total == file->completed) {
+        /* file complete */
         complete_insert(complete_idx, hash);
         file_free(file);
         cache_table_remove(cache_index, hash);
         parse_stat_completed++;
         parse_stat_incomplete--;
     }
-
-    //exit(0);
 }
 
 bool parse_overview(char *line)

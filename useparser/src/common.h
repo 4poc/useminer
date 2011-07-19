@@ -22,8 +22,10 @@
 #include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <inttypes.h> /* includes <stdint.h> */
 #include <string.h>
+#include <sys/stat.h>
 
 #include <gmp.h>
 
@@ -72,6 +74,8 @@
     #define INFO(...)
 #endif
 
+/* returns true if the file/directory exits */
+bool statok(char *path);
 /* determine filesize via file descriptor, uses fseek/ftell/fseek */
 uint64_t fdsize(FILE* fd);
 /* return current unix epoch in milliseconds */

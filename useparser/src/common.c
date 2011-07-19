@@ -16,6 +16,17 @@
  */
 #include "common.h"
 
+bool statok(char *path)
+{
+    struct stat stat_test;
+    if(stat(path, &stat_test) == 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 uint64_t fdsize(FILE* fd)
 {
     uint64_t size;

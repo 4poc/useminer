@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "common.h"
 #include "config.h"
@@ -58,6 +60,11 @@ void cache_table_insert(int index, char *hash, struct s_file *file);
 void cache_table_remove(int index, char *hash);
 /* search cached file entry within the cache table */
 struct s_file *cache_table_search(int index, char *hash);
+
+/* dump cache_table to disk */
+void cache_table_dump();
+/* restore cache_table to disk */
+void cache_table_restore();
 
 /* hashtable with md5 hashes for all completed files,
  * stored on disk for persistance */

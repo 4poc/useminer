@@ -21,7 +21,7 @@ bool cache_table_init()
     size_t table_size = *config_integer("cache_table_size") *
        sizeof(struct s_cache_slot *); 
 
-    INFO("init memory cache (table size: %d bytes)\n", table_size);
+    INFO("init memory cache (table size: %zu bytes)\n", table_size);
 
     cache_table = malloc(table_size);
     if(!cache_table) {
@@ -134,6 +134,54 @@ struct s_file *cache_table_search(int index, char *hash)
     }
 
     return NULL;
+}
+
+void cache_table_dump()
+{
+    int depth = *config_integer("cache_dump_depth");
+    char *path = config_string("cache_dump_path");
+    int path_size = strlen(path);
+
+    /* make sure path exists! */
+    if(!statok(path)) {
+        mkdir(path, 0766);
+    }
+    if(!statok(path)) {
+        ERROR("cache dump directory does not exist, and couldn't be created!\n");
+        return;
+    }
+
+    int filename_size = path_size + (depth*2) + 3 + 1;
+    char *filename = malloc(filename_size);
+    if(!filename) {
+        ERROR("unable to allocate memory dump filenames!\n");
+        return;
+    }
+    /* filename: ./cache/####.ct */
+    filename[filename_size-1] = '\0';
+    strcpy(filename, path);
+    sprintf(filename+(filename_size-4), ".ct");
+
+    INFO("dumping %d cached file objects to disk!\n", cache_stat_slots);
+    struct s_cache_slot *slot;
+    for(int i = 0; i < *config_integer("cache_table_size"); i++) {
+        slot = cache_table[i];
+        while(slot) {
+            // serialize to file: slot->file
+
+            DEBUG("dumping s_file to disk, with hash: %s\n", md5hex(slot->hash).str);
+            strncpy(filename + path_size, md5hex(slot->hash).str, depth*2);
+            DEBUG("dumping to filename: %s\n", filename);
+
+            slot = slot->next;
+        }
+    }
+
+    FREE(filename);
+}
+
+void cache_table_restore()
+{
 }
 
 bool complete_init()

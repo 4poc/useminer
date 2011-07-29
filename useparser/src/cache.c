@@ -216,6 +216,7 @@ void cache_table_dump()
                 }
             }
 
+            /* overwrites existing, should use something else */
             tpl_dump(tn, TPL_FILE, filename);
 
             tpl_free(tn);
